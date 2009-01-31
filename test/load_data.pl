@@ -45,7 +45,7 @@ use Data::Dumper;
 
 my $PROTOCOL = 'http';
 my $SERVER = 'localhost:4567';
-my $USERNAME = 'test_user';
+my $USERNAME = 'tom';
 my $PASSWORD = 'test123';
 my $ADMIN_SECRET = 'bad secret';
 my $PREFIX = 'weave/0.3';
@@ -54,7 +54,7 @@ my $ADMIN_PREFIX = 'weave/admin';
 my $VERBOSE = defined $ARGV[0] ? $ARGV[0] : 1;
 my $DO_ADMIN_TESTS = defined $ARGV[1] ? $ARGV[1] : 1;
 my $DELETE_USER = defined $ARGV[2] ? $ARGV[2] : 1;
-my $USE_RANDOM_USERNAME = defined $ARGV[3] ? $ARGV[3] : 1;
+my $USE_RANDOM_USERNAME = defined $ARGV[3] ? $ARGV[3] : 0;
 my $LOOPS = $ARGV[4] || 1;
 my $CHILDREN = $ARGV[5];
 
@@ -98,19 +98,6 @@ sub user_work
 	{
 		if ($DO_ADMIN_TESTS)
 		{
-		
-			if ($USE_RANDOM_USERNAME)
-			{
-				my $length = rand(10) + 6;
-				$USERNAME = '';
-				for (1..$length)
-				{
-					my $number = int(rand(36)) + 48;
-					$number += 7 if $number > 57;
-					$USERNAME .= chr($number);
-				}
-			}
-			
 			#create the user
 			$req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'create', 'user' => $USERNAME, 'pass' => $PASSWORD, 'secret' => $ADMIN_SECRET];
 			$req->content_type('application/x-www-form-urlencoded');
