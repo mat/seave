@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'sinatra'
 require 'sinatra/test/unit'
-require 'seave'
+require 'lib/seave'
 
 #PROTOCOL     = 'http'
 #SERVER       = 'localhost:4567'
@@ -13,7 +13,7 @@ ADMIN_SECRET = 'bad secret'
 PREFIX       = 'weave/0.3'
 ADMIN_PREFIX = 'weave/admin'
 
-class AdminTest < Test::Unit::TestCase
+class TestSeave < Test::Unit::TestCase
 
 #		#create the user
 #			$req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'create', 'user' => $USERNAME, 'pass' => $PASSWORD, 'secret' => $ADMIN_SECRET];
@@ -29,7 +29,11 @@ class AdminTest < Test::Unit::TestCase
 
 
   def test_create_user
-    post "/#{ADMIN_PREFIX}", "function" => "create", "user" => USERNAME, "pass" => PASSWORD, "secret" => ADMIN_SECRET
+    post "/#{ADMIN_PREFIX}", 
+        "function" => "create", 
+        "user" => USERNAME, 
+        "pass" => PASSWORD, 
+        "secret" => ADMIN_SECRET
     assert_equal 'success', body
     assert_equal 200, status
   end
