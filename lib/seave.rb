@@ -6,6 +6,9 @@ require 'activerecord'
 require 'digest/md5'
 require 'json'
 
+INVALID_USERNAME = '3'
+MISSING_PASSWORD = '7'
+
 def md5(str)
   digest = Digest::MD5.hexdigest(str)
 end
@@ -44,9 +47,12 @@ post '/weave/admin' do
     admin_create(params[:user], params[:pass])
   elsif function == 'check'
     admin_check(params[:user])
+  elsif function == 'update'
+    admin_update(params[:user], params[:pass])
   else
     [400, 1.to_json]
   end
+
 end
 
 get '/' do
@@ -65,4 +71,21 @@ end
 
 def admin_check(user)
   (User.exists?(:username => user) ? 1 : 0).to_json
+end
+
+def admin_update(user, newpass)
+
+   if user.nil? || user.empty?
+     [404, INVALID_USERNAME]
+   elsif newpass.nil? || newpass.empty?
+     [404, MISSING_PASSWORD]
+   elsif !User.exists?(:username => user)
+     [404, 'User not found']
+   else
+     User.find_by_username(user).update_attributes!(:md5 => md5(newpass))
+     [200, "success"]
+   end
+
+#  update_attributes!
+  #throw :halt, [404, MISSING_PASSWORD] unless User.exists?(:username => user)
 end

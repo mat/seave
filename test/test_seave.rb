@@ -68,7 +68,45 @@ class TestSeave < Test::Unit::TestCase
         "secret" => ADMIN_SECRET
     assert_equal '1', body
     assert_equal 200, status
+  end
 
+  def test_udpate_user_missing_username
+    post "/#{ADMIN_PREFIX}", 
+        "function" => "update", 
+        "pass" => PASSWORD,
+        "secret" => ADMIN_SECRET
+    assert_equal INVALID_USERNAME, body
+    assert_equal 404, status
+  end
+
+  def test_udpate_user_not_found
+    post "/#{ADMIN_PREFIX}", 
+        "function" => "update", 
+        "user" => 'wrong password', 
+        "pass" => PASSWORD,
+        "secret" => ADMIN_SECRET
+    assert_equal 'User not found', body
+    assert_equal 404, status
+  end
+
+  def test_udpate_user_missing_pass
+    post "/#{ADMIN_PREFIX}", 
+        "function" => "update", 
+        "user" => USERNAME, 
+        "secret" => ADMIN_SECRET
+    assert_equal MISSING_PASSWORD, body
+    assert_equal 404, status
+  end
+
+  def test_udpate_user
+    create_user # otherwise we would get a "404 User not found."
+    post "/#{ADMIN_PREFIX}", 
+        "function" => "update", 
+        "user" => USERNAME, 
+        "pass" => 'new pass',
+        "secret" => ADMIN_SECRET
+    assert_equal "success", body
+    assert_equal 200, status
   end
 
 end
