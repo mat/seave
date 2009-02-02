@@ -20,6 +20,8 @@ ActiveRecord::Base.establish_connection(
 
 class User < ActiveRecord::Base
   validates_presence_of :username
+  validates_format_of   :username, :with => /^[A-Z0-9._-]+/i
+
   validates_presence_of :md5 # password. no sha? hmm.
   validates_format_of   :md5, :with => /^[0-9a-f]{32,32}$/i
 end
@@ -61,11 +63,16 @@ end
 
 
 def admin_create(user, pass)
-  unless User.exists?(:username => user)
-    User.create!(:username => user, :md5 => md5(pass))
-    'success'
-  else
+  if User.exists?(:username => user)
     [400, 'User already exists']
+  else
+    begin
+      User.create!(:username => user, :md5 => md5(pass))
+    rescue
+      [400, 'Invalid characters in username']
+    else
+      'success'
+    end
   end
 end
 

@@ -40,6 +40,12 @@ class TestSeave < Test::Unit::TestCase
     assert_equal 200, status
   end
 
+  def test_create_user_bad_username
+    create_user("\]=*")
+    assert_equal 'Invalid characters in username', body
+    assert_equal 400, status
+  end
+
   def test_create_user_twice
     create_user
     assert_equal 'success', body
