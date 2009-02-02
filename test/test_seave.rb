@@ -41,7 +41,7 @@ class TestSeave < Test::Unit::TestCase
 
   def assert_success
     assert_equal "success", body
-    assert_equal 200, status
+    assert_stat 200
   end
 
 
@@ -64,8 +64,8 @@ class TestSeave < Test::Unit::TestCase
 
   def test_create_user_bad_username
     create_user("\]=*")
-    assert_equal 'Invalid characters in username', body
-    assert_equal 400, status
+    assert_body 'Invalid characters in username'
+    assert_stat 400
   end
 
   def test_create_user_twice
@@ -73,8 +73,8 @@ class TestSeave < Test::Unit::TestCase
     assert_success
 
     create_user
-    assert_equal 'User already exists', body
-    assert_equal 400, status
+    assert_body 'User already exists'
+    assert_stat 400
   end
 
   def test_check_user_existence_missing_username
@@ -86,35 +86,35 @@ class TestSeave < Test::Unit::TestCase
   def test_check_user_existence
     post_admin "function" => "check",
                "user" => USERNAME 
-    assert_equal '0', body
-    assert_equal 200, status
+    assert_body '0'
+    assert_stat 200
 
     create_user
     assert_success
 
     post_admin "function" => "check", "user" => USERNAME 
-    assert_equal '1', body
-    assert_equal 200, status
+    assert_body '1'
+    assert_stat 200
   end
 
   def test_udpate_user_missing_username
     post_admin "function" => "update",  "pass" => PASSWORD
-    assert_equal INVALID_USERNAME, body
-    assert_equal 404, status
+    assert_body INVALID_USERNAME
+    assert_stat 404
   end
 
   def test_udpate_user_not_found
     post_admin "function" => "update", 
         "user" => 'wrong password', 
         "pass" => PASSWORD
-    assert_equal 'User not found', body
-    assert_equal 404, status
+    assert_body 'User not found'
+    assert_stat 404
   end
 
   def test_udpate_user_missing_pass
     post_admin "function" => "update", "user" => USERNAME 
-    assert_equal MISSING_PASSWORD, body
-    assert_equal 404, status
+    assert_body MISSING_PASSWORD
+    assert_stat 404
   end
 
   def test_udpate_user
