@@ -2,6 +2,7 @@ require 'rubygems'
 require 'rake'
 
 # https://wiki.mozilla.org/Labs/Weave/0.3/Setup/Server
+# Need id for ActiveRecord, but it shouldn't hurt.
 USER_TABLE = 'CREATE TABLE users (id int, username text primary key, md5 text, email text, status integer, alert text);'
 
 namespace :db do
