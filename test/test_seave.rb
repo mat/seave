@@ -26,18 +26,26 @@ class TestSeave < Test::Unit::TestCase
     User.delete_all
   end
 
+  def post_admin(params)
+    params["secret"] = ADMIN_SECRET
+    post "/#{ADMIN_PREFIX}", params
+  end
+
+  def assert_success
+    assert_equal "success", body
+    assert_equal 200, status
+  end
+
+
   def create_user(user = USERNAME, pass = PASSWORD)
-   post "/#{ADMIN_PREFIX}", 
-        "function" => "create", 
-        "user" => user, 
-        "pass" => pass,
-        "secret" => ADMIN_SECRET
+    post_admin "function" => "create", 
+               "user" => user, 
+               "pass" => pass
   end
 
   def test_create_user
     create_user
-    assert_equal 'success', body
-    assert_equal 200, status
+    assert_success
   end
 
   def test_create_user_bad_username
@@ -48,8 +56,7 @@ class TestSeave < Test::Unit::TestCase
 
   def test_create_user_twice
     create_user
-    assert_equal 'success', body
-    assert_equal 200, status
+    assert_success
 
     create_user
     assert_equal 'User already exists', body
@@ -57,62 +64,45 @@ class TestSeave < Test::Unit::TestCase
   end
 
   def test_check_user_existence
-    post "/#{ADMIN_PREFIX}", 
-        "function" => "check", 
-        "user" => USERNAME, 
-        "secret" => ADMIN_SECRET
+    post_admin "function" => "check",
+               "user" => USERNAME 
     assert_equal '0', body
     assert_equal 200, status
 
     create_user
-    assert_equal 'success', body
-    assert_equal 200, status
+    assert_success
 
-    post "/#{ADMIN_PREFIX}", 
-        "function" => "check", 
-        "user" => USERNAME, 
-        "secret" => ADMIN_SECRET
+    post_admin "function" => "check", "user" => USERNAME 
     assert_equal '1', body
     assert_equal 200, status
   end
 
   def test_udpate_user_missing_username
-    post "/#{ADMIN_PREFIX}", 
-        "function" => "update", 
-        "pass" => PASSWORD,
-        "secret" => ADMIN_SECRET
+    post_admin "function" => "update",  "pass" => PASSWORD
     assert_equal INVALID_USERNAME, body
     assert_equal 404, status
   end
 
   def test_udpate_user_not_found
-    post "/#{ADMIN_PREFIX}", 
-        "function" => "update", 
+    post_admin "function" => "update", 
         "user" => 'wrong password', 
-        "pass" => PASSWORD,
-        "secret" => ADMIN_SECRET
+        "pass" => PASSWORD
     assert_equal 'User not found', body
     assert_equal 404, status
   end
 
   def test_udpate_user_missing_pass
-    post "/#{ADMIN_PREFIX}", 
-        "function" => "update", 
-        "user" => USERNAME, 
-        "secret" => ADMIN_SECRET
+    post_admin "function" => "update", "user" => USERNAME 
     assert_equal MISSING_PASSWORD, body
     assert_equal 404, status
   end
 
   def test_udpate_user
     create_user # otherwise we would get a "404 User not found."
-    post "/#{ADMIN_PREFIX}", 
-        "function" => "update", 
+    post_admin "function" => "update", 
         "user" => USERNAME, 
-        "pass" => 'new pass',
-        "secret" => ADMIN_SECRET
-    assert_equal "success", body
-    assert_equal 200, status
+        "pass" => 'new pass'
+    assert_success
   end
 
 end

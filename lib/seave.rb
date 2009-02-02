@@ -43,18 +43,16 @@ end
 
 post '/weave/admin' do
 
-  function = params[:function]
-
-  if function == 'create'
-    admin_create(params[:user], params[:pass])
-  elsif function == 'check'
-    admin_check(params[:user])
-  elsif function == 'update'
-    admin_update(params[:user], params[:pass])
-  else
-    [400, 1.to_json]
+  case params[:function]
+    when 'create'
+      admin_create(params[:user], params[:pass])
+    when 'check'
+      admin_check(params[:user])
+    when 'update'
+      admin_update(params[:user], params[:pass])
+    else
+      [400, 1.to_json]
   end
-
 end
 
 get '/' do
@@ -90,7 +88,7 @@ def admin_update(user, newpass)
      [404, 'User not found']
    else
      User.find_by_username(user).update_attributes!(:md5 => md5(newpass))
-     [200, "success"]
+     "success"
    end
 
 #  update_attributes!
