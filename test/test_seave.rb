@@ -144,7 +144,7 @@ class TestSeave < Test::Unit::TestCase
     post_admin "function" => "delete", "user" => USERNAME
     assert_success
 
-    puts ( post_admin "function" => "check", "user" => USERNAME).inspect
+    post_admin "function" => "check", "user" => USERNAME
     assert_stat 200
     assert_body '0'
   end
