@@ -1,9 +1,16 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
+require 'test/unit'
 require 'sinatra'
 require 'sinatra/test/unit'
 require 'lib/seave'
+require 'activerecord'
+
+ActiveRecord::Base.establish_connection(
+  :adapter => 'sqlite3',
+  :dbfile =>  'db/test.sqlite3'
+)
 
 #PROTOCOL     = 'http'
 #SERVER       = 'localhost:4567'
@@ -27,6 +34,10 @@ class TestSeave < Test::Unit::TestCase
 #			$result = $ua->request($req)->content();
 #			print "create user again (should fail): $result\n" if $VERBOSE;
 
+
+  def setup
+    User.delete_all
+  end
 
   def test_create_user
     post "/#{ADMIN_PREFIX}", 

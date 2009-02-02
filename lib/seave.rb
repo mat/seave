@@ -2,23 +2,40 @@
 
 require 'rubygems'
 require 'sinatra'
+require 'activerecord'
+
+ActiveRecord::Base.establish_connection(
+  :adapter => 'sqlite3',
+  :dbfile =>  'db/test.sqlite3'
+)
+
+class User < ActiveRecord::Base
+  validates_presence_of :username
+  validates_presence_of :md5 # password. no sha? hmm.
+end
+
 
 configure do
  #
 end
 
-users = []
+
+get '/users/?' do
+  User.all.to_json
+end
+
 
 get '/weave/admin' do
-  users.inspect
+  User.all.inspect
 end
 
 post '/weave/admin' do
-  if users.empty?
-    users << "foo"
+  user = 'tom'
+  unless User.exists?(:username => user)
+    User.create!( :username => user, :md5 => 'asfdg' )
     'success'
   else
-    'User already exists'
+    [400, 'User already exists']
   end
 end
 
