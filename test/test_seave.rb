@@ -31,6 +31,14 @@ class TestSeave < Test::Unit::TestCase
     post "/#{ADMIN_PREFIX}", params
   end
 
+  def assert_stat(expected_code)
+    assert_equal expected_code, status
+  end
+
+  def assert_body(expected_str)
+    assert_equal expected_str, body
+  end
+
   def assert_success
     assert_equal "success", body
     assert_equal 200, status
@@ -41,6 +49,12 @@ class TestSeave < Test::Unit::TestCase
     post_admin "function" => "create", 
                "user" => user, 
                "pass" => pass
+  end
+
+  def test_wrong_admin_function
+    post_admin 'function' => 'foo'
+    assert_body 'Unknown function'
+    assert_stat 400
   end
 
   def test_create_user
@@ -61,6 +75,12 @@ class TestSeave < Test::Unit::TestCase
     create_user
     assert_equal 'User already exists', body
     assert_equal 400, status
+  end
+
+  def test_check_user_existence_missing_username
+    post_admin "function" => "check", "user" => nil 
+    assert_body INVALID_USERNAME
+    assert_stat 404
   end
 
   def test_check_user_existence
@@ -103,6 +123,30 @@ class TestSeave < Test::Unit::TestCase
         "user" => USERNAME, 
         "pass" => 'new pass'
     assert_success
+  end
+
+  def test_delete_user_wo_providing_his_name
+    post_admin "function" => "delete", "user" => nil
+    assert_body INVALID_USERNAME
+    assert_stat 404
+  end
+
+  def test_delete_user_w_invalid_name
+    post_admin "function" => "delete", "user" => 'foo \$* bar'
+    assert_body 'Invalid characters in username'
+    assert_stat 400
+  end
+
+  def test_delete_user
+    create_user
+    assert_success
+
+    post_admin "function" => "delete", "user" => USERNAME
+    assert_success
+
+    puts ( post_admin "function" => "check", "user" => USERNAME).inspect
+    assert_stat 200
+    assert_body '0'
   end
 
 end

@@ -19,8 +19,9 @@ ActiveRecord::Base.establish_connection(
 )
 
 class User < ActiveRecord::Base
+  VALID_NAME = /^[A-Z0-9._-]+$/i
   validates_presence_of :username
-  validates_format_of   :username, :with => /^[A-Z0-9._-]+/i
+  validates_format_of   :username, :with => VALID_NAME
 
   validates_presence_of :md5 # password. no sha? hmm.
   validates_format_of   :md5, :with => /^[0-9a-f]{32,32}$/i
@@ -50,8 +51,10 @@ post '/weave/admin' do
       admin_check(params[:user])
     when 'update'
       admin_update(params[:user], params[:pass])
+    when 'delete'
+      admin_delete(params[:user])
     else
-      [400, 1.to_json]
+      [400, "Unknown function"]
   end
 end
 
@@ -61,36 +64,64 @@ end
 
 
 def admin_create(user, pass)
+  if pass.nil? || pass.empty?
+    return [404, MISSING_PASSWORD]
+  end
+
   if User.exists?(:username => user)
-    [400, 'User already exists']
+    return [400, 'User already exists']
+  end
+
+  begin
+    User.create!(:username => user, :md5 => md5(pass))
+  rescue
+    [400, 'Invalid characters in username']
   else
-    begin
-      User.create!(:username => user, :md5 => md5(pass))
-    rescue
-      [400, 'Invalid characters in username']
-    else
-      'success'
-    end
+    'success'
   end
 end
 
 def admin_check(user)
-  (User.exists?(:username => user) ? 1 : 0).to_json
+  if user.nil? || user.empty?
+    return [404, INVALID_USERNAME]
+  end
+
+  (User.exists?(:username => user) ? 1 : 0).to_s
 end
 
 def admin_update(user, newpass)
-
    if user.nil? || user.empty?
-     [404, INVALID_USERNAME]
-   elsif newpass.nil? || newpass.empty?
-     [404, MISSING_PASSWORD]
-   elsif !User.exists?(:username => user)
+     return [404, INVALID_USERNAME]
+   end
+
+   if newpass.nil? || newpass.empty?
+     return [404, MISSING_PASSWORD]
+   end
+
+   if !User.exists?(:username => user)
      [404, 'User not found']
    else
      User.find_by_username(user).update_attributes!(:md5 => md5(newpass))
      "success"
    end
+end
 
-#  update_attributes!
-  #throw :halt, [404, MISSING_PASSWORD] unless User.exists?(:username => user)
+def admin_delete(user)
+   if user.nil? || user.empty?
+     return [404, INVALID_USERNAME]
+   end
+
+   unless user =~ User::VALID_NAME
+     return [400, 'Invalid characters in username']
+   end
+
+   unless User.exists?(:username => user)
+     return [404, 'User not found']
+   end
+
+   if User.delete_all(:username => user) == 1
+     'success'
+   else
+     'Crash!'
+   end
 end
