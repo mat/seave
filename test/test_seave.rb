@@ -24,6 +24,7 @@ class TestSeave < Test::Unit::TestCase
 
   def setup
     User.delete_all
+    WBO.delete_all
   end
 
   def post_admin(params)
@@ -42,6 +43,17 @@ class TestSeave < Test::Unit::TestCase
   def assert_success
     assert_equal "success", body
     assert_stat 200
+  end
+
+  def ok_wbo_data(id)
+          {'id' => id, 
+            'parentid' => id%3, 
+            'sortindex' => id,
+            'depth'    => 1,
+            'modified' => 5.hours.from_now.to_f,
+            'collection' => "bookmarks",
+            'payload'  => "a89sdmawo58aqlva.8vj2w9fmq2af8vamva98fgqamf"
+           }
   end
 
 
@@ -147,6 +159,35 @@ class TestSeave < Test::Unit::TestCase
     post_admin "function" => "check", "user" => USERNAME
     assert_stat 200
     assert_body '0'
+  end
+	
+  def test_put_wbo
+    id = 42
+    put "/#{PREFIX}/#{USERNAME}/test/#{id}", ok_wbo_data(id).to_json
+  end
+
+  def test_put_wbo_w_malformed_json_payload
+    id = 42
+    put "/#{PREFIX}/#{USERNAME}/test/#{id}", '{:foo[}]'
+    assert_stat 400
+    assert_body JSON_PARSE_FAILURE 
+  end
+
+  def test_put_wbo_w_missing_id
+    id = 42
+    wbo_data = ok_wbo_data(id)
+    wbo_data.delete('id')
+    put "/#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
+    assert_success
+  end
+
+  def test_put_wbo_w_missing_modified
+    id = 42
+    wbo_data = ok_wbo_data(id)
+    wbo_data.delete('modified')
+    put "/#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
+    assert_stat 400
+    assert_body INVALID_WBO
   end
 
 end

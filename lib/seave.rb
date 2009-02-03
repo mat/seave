@@ -5,9 +5,12 @@ require 'sinatra'
 require 'activerecord'
 require 'digest/md5'
 require 'json'
+require 'pp'
 
 INVALID_USERNAME = '3'
 MISSING_PASSWORD = '7'
+JSON_PARSE_FAILURE = '6'
+INVALID_WBO = '8'
 
 def md5(str)
   digest = Digest::MD5.hexdigest(str)
@@ -27,11 +30,48 @@ class User < ActiveRecord::Base
   validates_format_of   :md5, :with => /^[0-9a-f]{32,32}$/i
 end
 
+class WBO < ActiveRecord::Base
+# Weave Basic Object they call it.
+
+  validates_length_of       :tid, :in => 1..64
+
+  validates_length_of       :parentid, :maximum => 64
+
+  validates_presence_of     :modified
+  validates_numericality_of :modified
+
+  validates_presence_of     :collection
+  validates_length_of       :collection, :maximum => 64 
+
+  validates_numericality_of :depth
+
+  validates_numericality_of :sortindex
+
+  validates_presence_of     :payload
+end
 
 configure do
  #
 end
 
+put "/weave/0.3/:user/:collection/:weave_id" do
+  json = request.body.read
+  begin
+    h = JSON.parse(json)
+
+    # FIXME: no weave_id, what then?
+    h['id'] ||= params[:weave_id] # Use id from path if none given.
+    h['tid'] = h.delete('id')     # Free 'real' id for ActiveRecord
+    w = WBO.new(h)
+    w.save!
+  rescue JSON::ParserError
+    return [400, JSON_PARSE_FAILURE]
+  rescue ActiveRecord::RecordInvalid
+    return [400, INVALID_WBO]
+  end
+  
+  'success'
+end
 
 get '/users/?' do
   User.all.to_json
