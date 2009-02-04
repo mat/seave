@@ -164,6 +164,7 @@ class TestSeave < Test::Unit::TestCase
   def test_put_wbo
     id = 42
     put "/#{PREFIX}/#{USERNAME}/test/#{id}", ok_wbo_data(id).to_json
+    assert_success
   end
 
   def test_put_wbo_w_malformed_json_payload
