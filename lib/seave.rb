@@ -7,6 +7,7 @@ require 'digest/md5'
 require 'json'
 require 'pp'
 
+ILLEGAL_METHOD   = '1'
 INVALID_USERNAME = '3'
 MISSING_PASSWORD = '7'
 JSON_PARSE_FAILURE = '6'
@@ -48,6 +49,11 @@ class WBO < ActiveRecord::Base
   validates_numericality_of :sortindex
 
   validates_presence_of     :payload
+
+  # TODO use :scope
+  def WBO.collections(user)
+    find_by_sql( ['SELECT DISTINCT collection FROM wbos WHERE username = ?',user])
+  end
 end
 
 configure do
@@ -62,6 +68,7 @@ put "/weave/0.3/:user/:collection/:weave_id" do
     # FIXME: no weave_id, what then?
     h['id'] ||= params[:weave_id] # Use id from path if none given.
     h['tid'] = h.delete('id')     # Free 'real' id for ActiveRecord
+    h['username'] = params[:user]
     w = WBO.new(h)
     w.save!
   rescue JSON::ParserError
@@ -71,6 +78,15 @@ put "/weave/0.3/:user/:collection/:weave_id" do
   end
   
   'success'
+end
+
+get "/weave/0.3/?" do
+  return [400, INVALID_USERNAME]
+end
+
+get "/weave/0.3/:user/?" do
+  wbos = WBO.collections(params[:user])
+  wbos.map{|wbo| wbo.collection}.to_json
 end
 
 get '/users/?' do

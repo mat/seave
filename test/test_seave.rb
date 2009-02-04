@@ -45,13 +45,13 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
   end
 
-  def ok_wbo_data(id)
+  def ok_wbo_data(id, collection = 'bookmarks')
           {'id' => id, 
             'parentid' => id%3, 
             'sortindex' => id,
             'depth'    => 1,
             'modified' => 5.hours.from_now.to_f,
-            'collection' => "bookmarks",
+            'collection' => collection,
             'payload'  => "a89sdmawo58aqlva.8vj2w9fmq2af8vamva98fgqamf"
            }
   end
@@ -62,6 +62,12 @@ class TestSeave < Test::Unit::TestCase
                "user" => user, 
                "pass" => pass
   end
+
+  def create_wbo(id = 42, user = USERNAME, collection = 'bookmarks')
+    json = ok_wbo_data(id, collection).to_json
+    put "/#{PREFIX}/#{user}/#{collection}/#{id}", json
+  end
+
 
   def test_wrong_admin_function
     post_admin 'function' => 'foo'
@@ -189,6 +195,23 @@ class TestSeave < Test::Unit::TestCase
     put "/#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
     assert_stat 400
     assert_body INVALID_WBO
+  end
+
+  def test_get_wbo_w_missing_username
+    get "/#{PREFIX}/"
+    assert_stat 400
+    assert_body INVALID_USERNAME
+  end
+
+  def test_get_wbo_for_user
+    create_wbo(42, USERNAME, 'foo')
+    create_wbo(43, USERNAME, 'foo')
+    create_wbo(44, USERNAME, 'bar')
+    create_wbo(45, USERNAME, 'baz')
+    create_wbo(46, USERNAME, 'baz')
+    get "/#{PREFIX}/#{USERNAME}"
+    assert_stat 200
+    assert_equal ['bar', 'baz', 'foo'], JSON.parse(body).sort
   end
 
 end

@@ -5,7 +5,7 @@ require 'rake'
 # id needed just for ActiveRecord but it shouldn't hurt.
 USER_TABLE = 'CREATE TABLE users (id int, username text primary key, md5 text, email text, status integer, alert text);'
 # Again, id is for ActiveRecord, tid is 'real' Weave id.
-WBO_TABLE = 'CREATE TABLE wbos (id int, tid text, sortindex int, depth int, collection text, parentid text, encryption text, modified real, encoding text, payload text, primary key (collection,tid) );'
+WBO_TABLE = 'CREATE TABLE wbos (id int, tid text, username text, sortindex int, depth int, collection text, parentid text, encryption text, modified real, encoding text, payload text, primary key (collection,tid) );'
 
 namespace :db do
   desc "Create in db/test.sqlite3"
