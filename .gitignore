@@ -1,4 +1,6 @@
 *.swp
 db/**
 .autotest
+seave.txt
+weave.txt
 
