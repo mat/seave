@@ -59,6 +59,7 @@ my $USE_RANDOM_USERNAME = defined $ARGV[3] ? $ARGV[3] : 1;
 my $LOOPS = $ARGV[4] || 1;
 my $CHILDREN = $ARGV[5];
 
+srand(time / 100); # Seed to get the same randoms in both rake xtest runs.
 if ($CHILDREN)
 {
 	my $kids;
