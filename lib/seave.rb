@@ -7,15 +7,15 @@ require 'digest/md5'
 require 'json'
 require 'pp'
 
-ILLEGAL_METHOD   = '1'
-INVALID_USERNAME = '3'
-MISSING_PASSWORD = '7'
-JSON_PARSE_FAILURE = '6'
-INVALID_WBO = '8'
 
-def md5(str)
-  digest = Digest::MD5.hexdigest(str)
-end
+
+configure do
+
+  ILLEGAL_METHOD   = '1'
+  INVALID_USERNAME = '3'
+  MISSING_PASSWORD = '7'
+  JSON_PARSE_FAILURE = '6'
+  INVALID_WBO = '8'
 
 ActiveRecord::Base.establish_connection(
   :adapter => 'sqlite3',
@@ -56,8 +56,10 @@ class WBO < ActiveRecord::Base
   end
 end
 
-configure do
- #
+end
+
+def md5(str)
+  digest = Digest::MD5.hexdigest(str)
 end
 
 put "/weave/0.3/:user/:collection/:weave_id" do
