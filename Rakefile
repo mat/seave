@@ -34,4 +34,13 @@ namespace :db do
     system 'curl -d "function=delete"  -d "user=bar" -d "pass=foo" -X POST http://localhost:4567/weave/admin'; puts
     system 'curl -d "function=delete"  -d "user=baz" -d "pass=foo" -X POST http://localhost:4567/weave/admin'; puts
   end
+
 end
+
+  desc "Test seave against weave with load_data.pl"
+  task :xtest do
+    puts 'Testing.'
+    system 'perl test/load_data.pl > seave.txt && perl test/load_data.pl weave.local > weave.txt'
+    puts 'OK.'
+  end
+
