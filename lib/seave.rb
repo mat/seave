@@ -98,6 +98,31 @@ get '/users/?' do
 end
 
 
+def not_supported
+  [501, 'Not yet supported.']
+end
+
+delete "#{PREFIX}/:user/:collection/?" do
+  not_supported
+end
+
+put "#{PREFIX}/:user/:collection/?" do
+  not_supported
+end
+
+post "#{PREFIX}/:user/:collection/?" do
+  not_supported
+end
+
+get "#{PREFIX}/:user/:collection/?" do
+  not_supported
+end
+
+get "#{PREFIX}/:user/:collection/:foo?" do
+  not_supported
+end
+
+
 get '/weave/admin' do
   User.all.inspect
 end
