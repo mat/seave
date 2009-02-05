@@ -19,13 +19,17 @@ configure do
   JSON_PARSE_FAILURE = '6'
   INVALID_WBO = '8'
 
+  # TODO: Move back to User again?
+  VALID_NAME = /^[A-Z0-9._-]+$/i
 ActiveRecord::Base.establish_connection(
   :adapter => 'sqlite3',
   :dbfile =>  'db/test.sqlite3'
 )
 
+end
+
 class User < ActiveRecord::Base
-  VALID_NAME = /^[A-Z0-9._-]+$/i
+  
   validates_presence_of :username
   validates_format_of   :username, :with => VALID_NAME
 
@@ -61,7 +65,6 @@ class WBO < ActiveRecord::Base
   end
 end
 
-end
 
 def md5(str)
   digest = Digest::MD5.hexdigest(str)
@@ -208,7 +211,7 @@ def admin_delete(user)
      return [404, INVALID_USERNAME]
    end
 
-   unless user =~ User::VALID_NAME
+   unless user =~ VALID_NAME
      return [400, 'Invalid characters in username']
    end
 
