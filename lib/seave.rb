@@ -40,6 +40,7 @@ end
 class WBO < ActiveRecord::Base
 # Weave Basic Object they call it.
 
+  validates_presence_of     :tid
   validates_length_of       :tid, :in => 1..64
 
   validates_length_of       :parentid, :maximum => 64
@@ -74,14 +75,15 @@ def timestamp
  Time.now.to_f.round(2).to_s 
 end
 
-put "#{PREFIX}/:user/:collection/:weave_id" do
+put "#{PREFIX}/:user/:collection/?(:weave_id)?" do
   json = request.body.read
   begin
     h = JSON.parse(json)
 
-    # FIXME: no weave_id, what then?
     h['id'] ||= params[:weave_id] # Use id from path if none given.
     h['tid'] = h.delete('id')     # Free 'real' id for ActiveRecord
+    return [400, INVALID_WBO] unless h['tid']
+
     h['username'] = params[:user]
     WBO.create(h)
   rescue JSON::ParserError
@@ -118,10 +120,6 @@ delete "#{PREFIX}/:user/:collection/:id" do
 end
 
 delete "#{PREFIX}/:user/:collection/?" do
-  not_supported
-end
-
-put "#{PREFIX}/:user/:collection/?" do
   not_supported
 end
 

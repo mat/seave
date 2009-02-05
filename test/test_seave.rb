@@ -183,13 +183,21 @@ class TestSeave < Test::Unit::TestCase
     assert_body JSON_PARSE_FAILURE 
   end
 
-  def test_put_wbo_w_missing_id
+  def test_put_wbo_w_missing_id_in_json
     id = 42
     wbo_data = ok_wbo_data(id)
     wbo_data.delete('id')
     put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
     assert_stat 200
     assert_timestamp_body
+  end
+
+  def test_put_wbo_w_missing_id
+    wbo_data = ok_wbo_data(42)
+    wbo_data.delete('id')
+    put "#{PREFIX}/#{USERNAME}/test/", wbo_data.to_json
+    assert_stat 400
+    assert_body INVALID_WBO
   end
 
   def test_get_wbo_w_missing_username
