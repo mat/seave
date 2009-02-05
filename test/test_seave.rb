@@ -44,12 +44,15 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
   end
 
+  def assert_timestamp_body
+    assert_equal timestamp, body
+  end
+
   def ok_wbo_data(id, collection = 'bookmarks')
           {'id' => id, 
             'parentid' => id%3, 
             'sortindex' => id,
             'depth'    => 1,
-            'modified' => 5.hours.from_now.to_f,
             'collection' => collection,
             'payload'  => "a89sdmawo58aqlva.8vj2w9fmq2af8vamva98fgqamf"
            }
@@ -169,7 +172,8 @@ class TestSeave < Test::Unit::TestCase
   def test_put_wbo
     id = 42
     put "#{PREFIX}/#{USERNAME}/test/#{id}", ok_wbo_data(id).to_json
-    assert_success
+    assert_stat 200
+    assert_timestamp_body
   end
 
   def test_put_wbo_w_malformed_json_payload
@@ -184,16 +188,8 @@ class TestSeave < Test::Unit::TestCase
     wbo_data = ok_wbo_data(id)
     wbo_data.delete('id')
     put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
-    assert_success
-  end
-
-  def test_put_wbo_w_missing_modified
-    id = 42
-    wbo_data = ok_wbo_data(id)
-    wbo_data.delete('modified')
-    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
-    assert_stat 400
-    assert_body INVALID_WBO
+    assert_stat 200
+    assert_timestamp_body
   end
 
   def test_get_wbo_w_missing_username
@@ -215,15 +211,16 @@ class TestSeave < Test::Unit::TestCase
 
   def test_delete_single_object
     create_wbo
-    assert_success
+    assert_stat 200
+    assert_timestamp_body
 
     delete "#{PREFIX}/#{USERNAME}/tom/42"
     assert_stat 200
-    assert_body Time.now.to_f.round(2).to_s
+    assert_timestamp_body
 
     delete "#{PREFIX}/#{USERNAME}/tom/42"
     assert_stat 200
-    assert_body Time.now.to_f.round(2).to_s
+    assert_timestamp_body
   end
 
 end

@@ -40,7 +40,6 @@ class WBO < ActiveRecord::Base
 
   validates_length_of       :parentid, :maximum => 64
 
-  validates_presence_of     :modified
   validates_numericality_of :modified
 
   validates_presence_of     :collection
@@ -51,6 +50,10 @@ class WBO < ActiveRecord::Base
   validates_numericality_of :sortindex
 
   validates_presence_of     :payload
+
+  def before_validation
+    self.modified = Time.now.to_f
+  end
 
   # TODO use :scope
   def WBO.collections(user)
@@ -64,6 +67,10 @@ def md5(str)
   digest = Digest::MD5.hexdigest(str)
 end
 
+def timestamp
+ Time.now.to_f.round(2).to_s 
+end
+
 put "#{PREFIX}/:user/:collection/:weave_id" do
   json = request.body.read
   begin
@@ -73,15 +80,14 @@ put "#{PREFIX}/:user/:collection/:weave_id" do
     h['id'] ||= params[:weave_id] # Use id from path if none given.
     h['tid'] = h.delete('id')     # Free 'real' id for ActiveRecord
     h['username'] = params[:user]
-    w = WBO.new(h)
-    w.save!
+    WBO.create(h)
   rescue JSON::ParserError
     return [400, JSON_PARSE_FAILURE]
-  rescue ActiveRecord::RecordInvalid
-    return [400, INVALID_WBO]
+  rescue ActiveRecord::RecordInvalid => e
+    return [400, INVALID_WBO + " " + e.to_s]
   end
   
-  'success'
+  timestamp
 end
 
 get "#{PREFIX}/?" do
@@ -105,7 +111,7 @@ end
 delete "#{PREFIX}/:user/:collection/:id" do
   wbo = WBO.find_by_collection_and_tid(params[:collection], params[:id])
   wbo.destroy! if wbo
-  Time.now.to_f.round(2).to_s
+  timestamp
 end
 
 delete "#{PREFIX}/:user/:collection/?" do
