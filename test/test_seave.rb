@@ -17,7 +17,6 @@ ActiveRecord::Base.establish_connection(
 USERNAME     = 'tom'
 PASSWORD     = 'test123'
 ADMIN_SECRET = 'bad secret'
-PREFIX       = 'weave/0.3'
 ADMIN_PREFIX = 'weave/admin'
 
 class TestSeave < Test::Unit::TestCase
@@ -65,7 +64,7 @@ class TestSeave < Test::Unit::TestCase
 
   def create_wbo(id = 42, user = USERNAME, collection = 'bookmarks')
     json = ok_wbo_data(id, collection).to_json
-    put "/#{PREFIX}/#{user}/#{collection}/#{id}", json
+    put "#{PREFIX}/#{user}/#{collection}/#{id}", json
   end
 
 
@@ -169,13 +168,13 @@ class TestSeave < Test::Unit::TestCase
 	
   def test_put_wbo
     id = 42
-    put "/#{PREFIX}/#{USERNAME}/test/#{id}", ok_wbo_data(id).to_json
+    put "#{PREFIX}/#{USERNAME}/test/#{id}", ok_wbo_data(id).to_json
     assert_success
   end
 
   def test_put_wbo_w_malformed_json_payload
     id = 42
-    put "/#{PREFIX}/#{USERNAME}/test/#{id}", '{:foo[}]'
+    put "#{PREFIX}/#{USERNAME}/test/#{id}", '{:foo[}]'
     assert_stat 400
     assert_body JSON_PARSE_FAILURE 
   end
@@ -184,7 +183,7 @@ class TestSeave < Test::Unit::TestCase
     id = 42
     wbo_data = ok_wbo_data(id)
     wbo_data.delete('id')
-    put "/#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
+    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
     assert_success
   end
 
@@ -192,13 +191,13 @@ class TestSeave < Test::Unit::TestCase
     id = 42
     wbo_data = ok_wbo_data(id)
     wbo_data.delete('modified')
-    put "/#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
+    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
     assert_stat 400
     assert_body INVALID_WBO
   end
 
   def test_get_wbo_w_missing_username
-    get "/#{PREFIX}/"
+    get "#{PREFIX}/"
     assert_stat 400
     assert_body INVALID_USERNAME
   end
@@ -209,7 +208,7 @@ class TestSeave < Test::Unit::TestCase
     create_wbo(44, USERNAME, 'bar')
     create_wbo(45, USERNAME, 'baz')
     create_wbo(46, USERNAME, 'baz')
-    get "/#{PREFIX}/#{USERNAME}"
+    get "#{PREFIX}/#{USERNAME}"
     assert_stat 200
     assert_equal ['bar', 'baz', 'foo'], JSON.parse(body).sort
   end

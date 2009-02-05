@@ -11,6 +11,8 @@ require 'pp'
 
 configure do
 
+  PREFIX       = '/0.3/user'
+
   ILLEGAL_METHOD   = '1'
   INVALID_USERNAME = '3'
   MISSING_PASSWORD = '7'
@@ -62,7 +64,7 @@ def md5(str)
   digest = Digest::MD5.hexdigest(str)
 end
 
-put "/weave/0.3/:user/:collection/:weave_id" do
+put "#{PREFIX}/:user/:collection/:weave_id" do
   json = request.body.read
   begin
     h = JSON.parse(json)
@@ -82,11 +84,11 @@ put "/weave/0.3/:user/:collection/:weave_id" do
   'success'
 end
 
-get "/weave/0.3/?" do
+get "#{PREFIX}/?" do
   return [400, INVALID_USERNAME]
 end
 
-get "/weave/0.3/:user/?" do
+get "#{PREFIX}/:user/?" do
   wbos = WBO.collections(params[:user])
   wbos.map{|wbo| wbo.collection}.to_json
 end
