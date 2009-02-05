@@ -102,6 +102,12 @@ def not_supported
   [501, 'Not yet supported.']
 end
 
+delete "#{PREFIX}/:user/:collection/:id" do
+  wbo = WBO.find_by_collection_and_tid(params[:collection], params[:id])
+  wbo.destroy! if wbo
+  Time.now.to_f.round(2).to_s
+end
+
 delete "#{PREFIX}/:user/:collection/?" do
   not_supported
 end

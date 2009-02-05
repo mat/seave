@@ -213,5 +213,18 @@ class TestSeave < Test::Unit::TestCase
     assert_equal ['bar', 'baz', 'foo'], JSON.parse(body).sort
   end
 
+  def test_delete_single_object
+    create_wbo
+    assert_success
+
+    delete "#{PREFIX}/#{USERNAME}/tom/42"
+    assert_stat 200
+    assert_body Time.now.to_f.round(2).to_s
+
+    delete "#{PREFIX}/#{USERNAME}/tom/42"
+    assert_stat 200
+    assert_body Time.now.to_f.round(2).to_s
+  end
+
 end
 
