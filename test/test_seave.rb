@@ -44,20 +44,27 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
   end
 
+  def wbo_as_json(data = {})
+    id        = data[:id] || 42
+    id_prefix = data[:id_prefix] || 'wbo'
+    depth     = data[:depth] || 0
+    payload   = data[:payload] || 'foo'
+
+    json = %Q|{"id":"{#{id_prefix}}#{id}","parentid":"{#{id_prefix}}#{id%3}","sortindex":#{id},"depth":#{depth},"payload":"#{payload}#{id}"}|
+  end
+
+  def wbo_as_json_wo_id(data = {})
+    id        = data[:id] || 42
+    id_prefix = data[:id_prefix] || 'wbo'
+    depth     = data[:depth] || 0
+    payload   = data[:payload] || 'foo'
+
+    json = %Q|{"id":"","parentid":"{#{id_prefix}}#{id%3}","sortindex":#{id},"depth":#{depth},"payload":"#{payload}#{id}"}|
+  end
+
   def assert_timestamp_body
     assert_equal timestamp, body
   end
-
-  def ok_wbo_data(id, collection = 'bookmarks')
-          {'id' => id, 
-            'parentid' => id%3, 
-            'sortindex' => id,
-            'depth'    => 1,
-            'collection' => collection,
-            'payload'  => "a89sdmawo58aqlva.8vj2w9fmq2af8vamva98fgqamf"
-           }
-  end
-
 
   def create_user(user = USERNAME, pass = PASSWORD)
     post_admin "function" => "create", 
@@ -66,7 +73,7 @@ class TestSeave < Test::Unit::TestCase
   end
 
   def create_wbo(id = 42, user = USERNAME, collection = 'bookmarks')
-    json = ok_wbo_data(id, collection).to_json
+    json = wbo_as_json(:id => id)
     put "#{PREFIX}/#{user}/#{collection}/#{id}", json
   end
 
@@ -171,7 +178,7 @@ class TestSeave < Test::Unit::TestCase
 	
   def test_put_wbo
     id = 42
-    put "#{PREFIX}/#{USERNAME}/test/#{id}", ok_wbo_data(id).to_json
+    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_as_json(:id => 42)
     assert_stat 200
     assert_timestamp_body
   end
@@ -185,17 +192,13 @@ class TestSeave < Test::Unit::TestCase
 
   def test_put_wbo_w_missing_id_in_json
     id = 42
-    wbo_data = ok_wbo_data(id)
-    wbo_data.delete('id')
-    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_data.to_json
+    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_as_json_wo_id
     assert_stat 200
     assert_timestamp_body
   end
 
   def test_put_wbo_w_missing_id
-    wbo_data = ok_wbo_data(42)
-    wbo_data.delete('id')
-    put "#{PREFIX}/#{USERNAME}/test/", wbo_data.to_json
+    put "#{PREFIX}/#{USERNAME}/test/", wbo_as_json_wo_id
     assert_stat 400
     assert_body INVALID_WBO
   end
