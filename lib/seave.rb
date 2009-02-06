@@ -85,6 +85,7 @@ put "#{PREFIX}/:user/:collection/?(:weave_id)?" do
     return [400, INVALID_WBO] unless h['tid']
 
     h['username'] = params[:user]
+    h['collection'] = params[:collection]
     WBO.create(h)
   rescue JSON::ParserError
     return [400, JSON_PARSE_FAILURE]
