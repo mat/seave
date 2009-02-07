@@ -18,6 +18,7 @@ USERNAME     = 'tom'
 PASSWORD     = 'test123'
 ADMIN_SECRET = 'bad secret'
 ADMIN_PREFIX = 'weave/admin'
+ID           = 42
 
 class TestSeave < Test::Unit::TestCase
 
@@ -45,7 +46,7 @@ class TestSeave < Test::Unit::TestCase
   end
 
   def wbo_as_json(data = {})
-    id        = data[:id] || 42
+    id        = data[:id] || ID
     id_prefix = data[:id_prefix] || 'wbo'
     depth     = data[:depth] || 0
     payload   = data[:payload] || 'foo'
@@ -54,12 +55,7 @@ class TestSeave < Test::Unit::TestCase
   end
 
   def wbo_as_json_wo_id(data = {})
-    id        = data[:id] || 42
-    id_prefix = data[:id_prefix] || 'wbo'
-    depth     = data[:depth] || 0
-    payload   = data[:payload] || 'foo'
-
-    json = %Q|{"id":"","parentid":"{#{id_prefix}}#{id%3}","sortindex":#{id},"depth":#{depth},"payload":"#{payload}#{id}"}|
+    wbo_as_json.gsub(/\"id\":\"[^"]*\"/, '"id":""')
   end
 
   def assert_timestamp_body
@@ -72,11 +68,9 @@ class TestSeave < Test::Unit::TestCase
                "pass" => pass
   end
 
-  def create_wbo(id = 42, user = USERNAME, collection = 'bookmarks')
-    json = wbo_as_json(:id => id)
-    put "#{PREFIX}/#{user}/#{collection}/#{id}", json
+  def create_wbo(id = ID, user = USERNAME, collection = 'bookmarks')
+    put "#{PREFIX}/#{user}/#{collection}/#{id}", wbo_as_json(:id => id)
   end
-
 
   def test_wrong_admin_function
     post_admin 'function' => 'foo'
@@ -145,7 +139,7 @@ class TestSeave < Test::Unit::TestCase
   end
 
   def test_udpate_user
-    create_user # otherwise we would get a "404 User not found."
+    create_user
     post_admin "function" => "update", 
         "user" => USERNAME, 
         "pass" => 'new pass'
@@ -177,22 +171,19 @@ class TestSeave < Test::Unit::TestCase
   end
 	
   def test_put_wbo
-    id = 42
-    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_as_json(:id => 42)
+    put "#{PREFIX}/#{USERNAME}/test/#{ID}", wbo_as_json(:id => ID)
     assert_stat 200
     assert_timestamp_body
   end
 
   def test_put_wbo_w_malformed_json_payload
-    id = 42
-    put "#{PREFIX}/#{USERNAME}/test/#{id}", '{:foo[}]'
+    put "#{PREFIX}/#{USERNAME}/test/#{ID}", '{:foo[}]'
     assert_stat 400
     assert_body JSON_PARSE_FAILURE 
   end
 
   def test_put_wbo_w_missing_id_in_json
-    id = 42
-    put "#{PREFIX}/#{USERNAME}/test/#{id}", wbo_as_json_wo_id
+    put "#{PREFIX}/#{USERNAME}/test/#{ID}", wbo_as_json_wo_id
     assert_stat 200
     assert_timestamp_body
   end
@@ -210,11 +201,11 @@ class TestSeave < Test::Unit::TestCase
   end
 
   def test_get_wbo_for_user
-    create_wbo(42, USERNAME, 'foo')
-    create_wbo(43, USERNAME, 'foo')
-    create_wbo(44, USERNAME, 'bar')
-    create_wbo(45, USERNAME, 'baz')
-    create_wbo(46, USERNAME, 'baz')
+    create_wbo(ID  , USERNAME, 'foo')
+    create_wbo(ID+1, USERNAME, 'foo')
+    create_wbo(ID+2, USERNAME, 'bar')
+    create_wbo(ID+3, USERNAME, 'baz')
+    create_wbo(ID+4, USERNAME, 'baz')
     get "#{PREFIX}/#{USERNAME}"
     assert_stat 200
     assert_equal ['bar', 'baz', 'foo'], JSON.parse(body).sort
@@ -225,11 +216,11 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
     assert_timestamp_body
 
-    delete "#{PREFIX}/#{USERNAME}/tom/42"
+    delete "#{PREFIX}/#{USERNAME}/tom/#{ID}"
     assert_stat 200
     assert_timestamp_body
 
-    delete "#{PREFIX}/#{USERNAME}/tom/42"
+    delete "#{PREFIX}/#{USERNAME}/tom/#{ID}"
     assert_stat 200
     assert_timestamp_body
   end
