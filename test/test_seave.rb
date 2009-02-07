@@ -51,7 +51,11 @@ class TestSeave < Test::Unit::TestCase
     depth     = data[:depth] || 0
     payload   = data[:payload] || 'foo'
 
-    json = %Q|{"id":"{#{id_prefix}}#{id}","parentid":"{#{id_prefix}}#{id%3}","sortindex":#{id},"depth":#{depth},"payload":"#{payload}#{id}"}|
+    json = %Q|{"id":"{#{id_prefix}}#{id}",
+               "parentid":"{#{id_prefix}}#{id%3}",
+               "sortindex":#{id},
+               "depth":#{depth},
+               "payload":"#{payload}#{id}"}|
   end
 
   def wbo_as_json_wo_id(data = {})
@@ -220,6 +224,7 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
     assert_timestamp_body
 
+    # Idempotent
     delete "#{PREFIX}/#{USERNAME}/tom/#{ID}"
     assert_stat 200
     assert_timestamp_body
