@@ -80,9 +80,12 @@ put "#{PREFIX}/:user/:collection/?(:weave_id)?" do
   begin
     h = JSON.parse(json)
 
-    h['id'] ||= params[:weave_id] # Use id from path if none given.
-    h['tid'] = h.delete('id')     # Free 'real' id for ActiveRecord
-    return [400, INVALID_WBO] unless h['tid']
+    # Use id from path if not contained in JSON.
+    h['id'] = params['weave_id'] if h['id'].blank?
+
+    # Free 'real' id for ActiveRecord
+    h['tid'] = h.delete('id')
+    return [400, INVALID_WBO] if h['tid'].blank?
 
     h['username'] = params[:user]
     h['collection'] = params[:collection]
