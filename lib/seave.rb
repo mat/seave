@@ -21,12 +21,13 @@ configure do
 
   # TODO: Move back to User again?
   VALID_NAME = /^[A-Z0-9._-]+$/i
+
+end
+
 ActiveRecord::Base.establish_connection(
   :adapter => 'sqlite3',
   :dbfile =>  'db/test.sqlite3'
 )
-
-end
 
 class User < ActiveRecord::Base
   
