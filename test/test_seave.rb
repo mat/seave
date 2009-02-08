@@ -222,6 +222,7 @@ class TestSeave < Test::Unit::TestCase
     create_wbo(ID+2, USERNAME, collection)
     create_wbo(ID+3, USERNAME, 'foo')
     create_wbo(ID+4, USERNAME, collection)
+
     get "#{PREFIX}/#{USERNAME}/#{collection}"
     assert_stat 200
     assert_equal ["\{wbo\}#{ID}",
@@ -229,6 +230,23 @@ class TestSeave < Test::Unit::TestCase
                   "\{wbo\}#{ID + 2}",
                   "\{wbo\}#{ID + 4}",
                  ], JSON.parse(body).sort
+  end
+
+  def test_get_collection_sorted
+    collection = 'bookmarks'
+    create_wbo(ID  , USERNAME, collection)
+    create_wbo(ID+4, USERNAME, collection)
+    create_wbo(ID+3, USERNAME, 'foo')
+    create_wbo(ID+1, USERNAME, collection)
+    create_wbo(ID+2, USERNAME, collection)
+
+    get "#{PREFIX}/#{USERNAME}/#{collection}/?sort=index"
+    assert_stat 200
+    assert_equal ["\{wbo\}#{ID}",
+                  "\{wbo\}#{ID + 1}",
+                  "\{wbo\}#{ID + 2}",
+                  "\{wbo\}#{ID + 4}",
+                 ], JSON.parse(body)
   end
 
   def test_delete_single_object

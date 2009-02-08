@@ -139,8 +139,18 @@ post "#{PREFIX}/:user/:collection/?" do
 end
 
 get "#{PREFIX}/:user/:collection/?" do
-  wbos = WBO.find_all_by_username_and_collection(params[:user], 
-                                                 params[:collection])
+  puts params.inspect
+
+  wbos = case params[:sort]
+    when 'index'
+      WBO.find_all_by_username_and_collection(params[:user],
+                                              params[:collection],
+                                              :order => 'sortindex ASC')
+    else
+      WBO.find_all_by_username_and_collection(params[:user],
+                                              params[:collection])
+  end
+
   wbos.map{|w| w.tid }.to_json
 end
 
