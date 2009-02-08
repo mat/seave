@@ -63,7 +63,7 @@ class TestSeave < Test::Unit::TestCase
   end
 
   def assert_timestamp_body
-    assert_equal timestamp, body
+    assert_in_delta timestamp, body, 0.1
   end
 
   def create_user(user = USERNAME, pass = PASSWORD)
