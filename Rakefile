@@ -7,17 +7,17 @@ USER_TABLE = 'CREATE TABLE users (id int, username text primary key, md5 text, e
 # Again, id is for ActiveRecord, tid is 'real' Weave id.
 WBO_TABLE = 'CREATE TABLE wbos (id int, tid text, username text, sortindex int, depth int, collection text, parentid text, encryption text, modified real, encoding text, payload text, primary key (collection,tid) );'
 
+DB_FILE = "db/test.sqlite3"
+
 namespace :db do
   desc "Create in db/test.sqlite3"
   task :create do
 
-    db_file = "db/test.sqlite3"
-
-    if File.exists?(db_file)
-      puts "#{db_file} already exists. Won't overwrite it. Delete first."
+    if File.exists?(DB_FILE)
+      puts "#{DB_FILE} already exists. Won't overwrite it. Delete first."
     else
-      cmd = "sqlite3 #{db_file} '#{USER_TABLE} #{WBO_TABLE}'"
-      puts "Created #{db_file}. Bye." if system(cmd) 
+      cmd = "sqlite3 #{DB_FILE} '#{USER_TABLE} #{WBO_TABLE}'"
+      puts "Created #{DB_FILE}. Bye." if system(cmd) 
     end
   end
 
@@ -39,8 +39,14 @@ end
 
   desc "Test seave against weave with load_data.pl"
   task :xtest do
-    puts 'Testing.'
-    system 'perl test/load_data.pl > seave.txt && perl test/load_data.pl weave.local > weave.txt'
+    puts 'Clearing database.'
+    system "sqlite3 #{DB_FILE} 'DELETE FROM users; DELETE FROM wbos;'"
+    puts 'Testing Seave'
+    system 'perl test/load_data.pl > seave.txt'
+    puts 'Clearing database again.'
+    system "sqlite3 #{DB_FILE} 'DELETE FROM users; DELETE FROM wbos;'"
+    puts 'Testing Weave'
+    system 'perl test/load_data.pl weave.local > weave.txt'
     puts 'OK.'
   end
 
