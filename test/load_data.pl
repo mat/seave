@@ -132,39 +132,39 @@ sub user_work
 			#create the user
 			$req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'create', 'user' => $USERNAME, 'pass' => $PASSWORD, 'secret' => $ADMIN_SECRET];
 			$req->content_type('application/x-www-form-urlencoded');
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			print "create user: $result\n" if $VERBOSE;
 		
 			#create the user again
 			$req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'create', 'user' => $USERNAME, 'pass' => $PASSWORD, 'secret' => $ADMIN_SECRET];
 			$req->content_type('application/x-www-form-urlencoded');
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			print "create user again (should fail): $result\n" if $VERBOSE;
 		
 			#check user existence
 			$req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'check', 'user' => $USERNAME, 'secret' => $ADMIN_SECRET];
 			$req->content_type('application/x-www-form-urlencoded');
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			print "check user existence: $result\n" if $VERBOSE;
 			
 			#change the password
 			$PASSWORD .= '2';
 			my $req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'update', 'user' => $USERNAME, 'pass' => $PASSWORD, 'secret' => $ADMIN_SECRET];
 			$req->content_type('application/x-www-form-urlencoded');
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			print "change password: $result\n" if $VERBOSE;
 			
 			#change password (bad secret)
 			my $req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'update', 'user' => $USERNAME, 'pass' => $PASSWORD, 'secret' => 'wrong secret'];
 			$req->content_type('application/x-www-form-urlencoded');
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			print "change password(bad secret): $result\n" if $VERBOSE;
 		}	
 		
 		#clear the user
 		$req = HTTP::Request->new(DELETE => "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test");
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "delete: $result\n" if $VERBOSE;
 		my $id = 0;
 		
@@ -179,7 +179,7 @@ sub user_work
 			$req->authorization_basic($USERNAME, $PASSWORD);
 			$req->content($json);
 			$req->content_type('application/x-www-form-urlencoded');
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+                        my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			
 			print $id . ": $result\n" if $VERBOSE;
 		}
@@ -203,7 +203,7 @@ sub user_work
 		$req->content_type('application/x-www-form-urlencoded');
 		{
 			local $SIG{'__WARN__'} = sub{}; # stupid warn in LWP can't be suppressed any other way...
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		}
 		print "batch upload: $result\n" if $VERBOSE;
 		
@@ -214,7 +214,7 @@ sub user_work
 		$req->authorization_basic($USERNAME, $PASSWORD);
 		$req->content($json);
 		$req->content_type('application/x-www-form-urlencoded');
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		
 		print "replace: $result\n" if $VERBOSE;
 		
@@ -236,7 +236,7 @@ sub user_work
 		$req->authorization_basic($USERNAME, $PASSWORD);
 		$req->content($json);
 		$req->content_type('application/x-www-form-urlencoded');
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		
 		print "replace (older, should fail): $result\n" if $VERBOSE;
 		
@@ -249,7 +249,7 @@ sub user_work
 		$req->authorization_basic($USERNAME, $PASSWORD);
 		$req->content($json);
 		$req->content_type('application/x-www-form-urlencoded');
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		
 		print "bad PUT (no id): $result\n" if $VERBOSE;
 		
@@ -261,7 +261,7 @@ sub user_work
 		$req->authorization_basic($USERNAME, $PASSWORD);
 		$req->content($json);
 		$req->content_type('application/x-www-form-urlencoded');
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		
 		print "bad PUT (bad json): $result\n" if $VERBOSE;
 		
@@ -272,7 +272,7 @@ sub user_work
 		my $req = PUT "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/$id";
 		$req->content($json);
 		$req->content_type('application/x-www-form-urlencoded');
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		
 		print "bad PUT (no auth): $result\n" if $VERBOSE;
 		
@@ -283,7 +283,7 @@ sub user_work
 		$req->authorization_basic($USERNAME, 'badpassword');
 		$req->content($json);
 		$req->content_type('application/x-www-form-urlencoded');
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		
 		print "bad PUT (wrong pw): $result\n" if $VERBOSE;
 		
@@ -294,7 +294,7 @@ sub user_work
 		$req->authorization_basic($USERNAME, $PASSWORD);
 		$req->content($json);
 		$req->content_type('application/x-www-form-urlencoded');
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		
 		print "bad PUT (payload not json-encoded): $result\n" if $VERBOSE;
 		
@@ -307,7 +307,7 @@ sub user_work
 		$req->content_type('application/x-www-form-urlencoded');
 		{
 			local $SIG{'__WARN__'} = sub{}; # stupid warn in LWP can't be suppressed any other way...
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		}
 		print "bad batch upload (bad json): $result\n" if $VERBOSE;
 		
@@ -322,7 +322,7 @@ sub user_work
 		$req->content_type('application/x-www-form-urlencoded');
 		{
 			local $SIG{'__WARN__'} = sub{}; # stupid warn in LWP can't be suppressed any other way...
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		}
 		print "mixed batch upload (bad parentids on some): $result\n" if $VERBOSE;
 		
@@ -330,73 +330,73 @@ sub user_work
 		# should return ["1", "2" .. "20"]
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "should return [\"1\", \"2\" .. \"20\"] (in some order): $result\n" if $VERBOSE;
 		
 		# should return ["1", "2" .. "20"]
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?sort=index";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "should return [\"1\", \"2\" .. \"20\"] (in order): $result\n" if $VERBOSE;
 		
 		# should return ["1", "2" .. "20"]
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?sort=depthindex";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "should return [\"1\", \"2\" .. \"20\"] (3 at end): $result\n" if $VERBOSE;
 		
 		# should return the user id record for #3 (check the depth)
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/{$id_prefix}3";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "should return record 3 (replaced depth): $result\n" if $VERBOSE;
 		
 		# should return the user id record for #4
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/{$id_prefix}4";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "should return record 4: $result\n" if $VERBOSE;
 		
 		# should return about half the ids
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?modified=2454755";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "modified after halftime: $result\n" if $VERBOSE;
 		
 		# should return about one-third the ids
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?parentid={$id_prefix}1";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "parent ids (mod 3 = 1): $result\n" if $VERBOSE;
 		
 		# mix our params
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?parentid={$id_prefix}1&modified=2454755";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "parentid and modified: $result\n" if $VERBOSE;
 		
 		#as above, but full records
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?parentid={$id_prefix}1&modified=2454755&full=1";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "parentid and modified (full records): $result\n" if $VERBOSE;
 		
 		#delete the first two with $parentid = 1
 		$req = HTTP::Request->new(DELETE => "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test?parentid={$id_prefix}1&limit=2");
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "delete 2 items: $result\n" if $VERBOSE;
 		
 		# should return about one-third the ids, less the two we deleted
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?parentid={$id_prefix}1";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "parent ids (mod 3 = 1): $result\n" if $VERBOSE;
 		
 		# should return ['test']
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/";
 		$req->authorization_basic($USERNAME, $PASSWORD);
-		$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "collection list: $result\n" if $VERBOSE;
 		
 		
@@ -405,7 +405,7 @@ sub user_work
 			#clear the user again
 			my $req = HTTP::Request->new(DELETE => "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test");
 			$req->authorization_basic($USERNAME, $PASSWORD);
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			print "clear: $result\n" if $VERBOSE;
 		}
 		
@@ -414,7 +414,7 @@ sub user_work
 			#delete the user
 			my $req = POST "$PROTOCOL://$SERVER/$ADMIN_PREFIX", ['function' => 'delete', 'user' => $USERNAME, 'secret' => $ADMIN_SECRET];
 			$req->content_type('application/x-www-form-urlencoded');
-			$result = $ua->request($req)->code . " " . $req->method . " " . $req->uri->path ."\n" . $ua->request($req)->content() . "\n";
+			my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 			print "delete user: $result\n" if $VERBOSE;
 		}
 	}
