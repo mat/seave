@@ -139,7 +139,9 @@ post "#{PREFIX}/:user/:collection/?" do
 end
 
 get "#{PREFIX}/:user/:collection/?" do
-  not_supported
+  wbos = WBO.find_all_by_username_and_collection(params[:user], 
+                                                 params[:collection])
+  wbos.map{|w| w.tid }.to_json
 end
 
 get "#{PREFIX}/:user/:collection/:foo?" do
