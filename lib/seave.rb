@@ -13,11 +13,17 @@ configure do
 
   PREFIX       = '/0.3/user'
 
-  ILLEGAL_METHOD   = '1'
-  INVALID_USERNAME = '3'
-  MISSING_PASSWORD = '7'
-  JSON_PARSE_FAILURE = '6'
-  INVALID_WBO = '8'
+  # Error codes.
+  ILLEGAL_METHOD   = '"1"'
+  INVALID_USERNAME = '"3"'
+  MISSING_PASSWORD = '"7"'
+  JSON_PARSE_FAILURE = '"6"'
+  INVALID_WBO = '"8"'
+
+  # Error messages.
+  USER_ALREADY_EXISTS    = '"User already exists"'
+  USER_NOT_FOUND         = '"User not found"'
+  INVALID_USERNAME_CHARS = '"Invalid characters in username"'
 
   # TODO: Move back to User again?
   VALID_NAME = /^[A-Z0-9._-]+$/i
@@ -172,13 +178,13 @@ def admin_create(user, pass)
   end
 
   if User.exists?(:username => user)
-    return [400, 'User already exists']
+    return [400, USER_ALREADY_EXISTS]
   end
 
   begin
     User.create!(:username => user, :md5 => md5(pass))
   rescue
-    [400, 'Invalid characters in username']
+    [400, INVALID_USERNAME_CHARS]
   else
     'success'
   end
@@ -202,7 +208,7 @@ def admin_update(user, newpass)
    end
 
    if !User.exists?(:username => user)
-     [404, 'User not found']
+     [404, USER_NOT_FOUND]
    else
      User.find_by_username(user).update_attributes!(:md5 => md5(newpass))
      "success"
@@ -215,11 +221,11 @@ def admin_delete(user)
    end
 
    unless user =~ VALID_NAME
-     return [400, 'Invalid characters in username']
+     return [400, INVALID_USERNAME_CHARS]
    end
 
    unless User.exists?(:username => user)
-     return [404, 'User not found']
+     return [404, USER_NOT_FOUND]
    end
 
    if User.delete_all(:username => user) == 1

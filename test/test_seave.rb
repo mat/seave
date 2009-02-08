@@ -89,7 +89,7 @@ class TestSeave < Test::Unit::TestCase
 
   def test_create_user_bad_username
     create_user("\]=*")
-    assert_body 'Invalid characters in username'
+    assert_body INVALID_USERNAME_CHARS
     assert_stat 400
   end
 
@@ -98,7 +98,7 @@ class TestSeave < Test::Unit::TestCase
     assert_success
 
     create_user
-    assert_body 'User already exists'
+    assert_body USER_ALREADY_EXISTS
     assert_stat 400
   end
 
@@ -132,7 +132,7 @@ class TestSeave < Test::Unit::TestCase
     post_admin "function" => "update", 
         "user" => 'wrong password', 
         "pass" => PASSWORD
-    assert_body 'User not found'
+    assert_body USER_NOT_FOUND
     assert_stat 404
   end
 
@@ -158,7 +158,7 @@ class TestSeave < Test::Unit::TestCase
 
   def test_delete_user_w_invalid_name
     post_admin "function" => "delete", "user" => 'foo \$* bar'
-    assert_body 'Invalid characters in username'
+    assert_body INVALID_USERNAME_CHARS
     assert_stat 400
   end
 
