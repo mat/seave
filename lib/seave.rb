@@ -139,13 +139,23 @@ post "#{PREFIX}/:user/:collection/?" do
 end
 
 get "#{PREFIX}/:user/:collection/?" do
-  puts params.inspect
-
   wbos = case params[:sort]
     when 'index'
       WBO.find_all_by_username_and_collection(params[:user],
                                               params[:collection],
                                               :order => 'sortindex ASC')
+    when 'newest'
+      WBO.find_all_by_username_and_collection(params[:user],
+                                              params[:collection],
+                                              :order => 'modified DESC')
+    when 'oldest'
+      WBO.find_all_by_username_and_collection(params[:user],
+                                              params[:collection],
+                                              :order => 'modified ASC')
+    when 'depthindex'
+      WBO.find_all_by_username_and_collection(params[:user],
+                                              params[:collection],
+                                              :order => 'depth, sortindex')
     else
       WBO.find_all_by_username_and_collection(params[:user],
                                               params[:collection])

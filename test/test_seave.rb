@@ -48,7 +48,7 @@ class TestSeave < Test::Unit::TestCase
   def wbo_as_json(data = {})
     id        = data[:id] || ID
     id_prefix = data[:id_prefix] || 'wbo'
-    depth     = data[:depth] || 0
+    depth     = data[:depth] || id % 3
     payload   = data[:payload] || 'foo'
 
     json = %Q|{"id":"{#{id_prefix}}#{id}",
@@ -232,7 +232,7 @@ class TestSeave < Test::Unit::TestCase
                  ], JSON.parse(body).sort
   end
 
-  def test_get_collection_sorted
+  def test_get_collection_sorted_by_index
     collection = 'bookmarks'
     create_wbo(ID  , USERNAME, collection)
     create_wbo(ID+4, USERNAME, collection)
@@ -246,6 +246,57 @@ class TestSeave < Test::Unit::TestCase
                   "\{wbo\}#{ID + 1}",
                   "\{wbo\}#{ID + 2}",
                   "\{wbo\}#{ID + 4}",
+                 ], JSON.parse(body)
+  end
+
+  def test_get_collection_sorted_by_newest
+    collection = 'bookmarks'
+    create_wbo(ID  , USERNAME, collection)
+    create_wbo(ID+4, USERNAME, collection)
+    create_wbo(ID+3, USERNAME, 'foo')
+    create_wbo(ID+1, USERNAME, collection)
+    create_wbo(ID+2, USERNAME, collection)
+
+    get "#{PREFIX}/#{USERNAME}/#{collection}/?sort=newest"
+    assert_stat 200
+    assert_equal ["\{wbo\}#{ID+2}",
+                  "\{wbo\}#{ID+1}",
+                  "\{wbo\}#{ID+4}",
+                  "\{wbo\}#{ID}",
+                 ], JSON.parse(body)
+  end
+
+  def test_get_collection_sorted_by_oldest
+    collection = 'bookmarks'
+    create_wbo(ID  , USERNAME, collection)
+    create_wbo(ID+4, USERNAME, collection)
+    create_wbo(ID+3, USERNAME, 'foo')
+    create_wbo(ID+1, USERNAME, collection)
+    create_wbo(ID+2, USERNAME, collection)
+
+    get "#{PREFIX}/#{USERNAME}/#{collection}/?sort=oldest"
+    assert_stat 200
+    assert_equal ["\{wbo\}#{ID}",
+                  "\{wbo\}#{ID+4}",
+                  "\{wbo\}#{ID+1}",
+                  "\{wbo\}#{ID+2}",
+                 ], JSON.parse(body)
+  end
+
+  def test_get_collection_sorted_by_depthindex
+    collection = 'bookmarks'
+    create_wbo(ID  , USERNAME, collection)
+    create_wbo(ID+4, USERNAME, collection)
+    create_wbo(ID+3, USERNAME, 'foo')
+    create_wbo(ID+1, USERNAME, collection)
+    create_wbo(ID+2, USERNAME, collection)
+
+    get "#{PREFIX}/#{USERNAME}/#{collection}/?sort=depthindex"
+    assert_stat 200
+    assert_equal ["\{wbo\}#{ID}",
+                  "\{wbo\}#{ID+1}",
+                  "\{wbo\}#{ID+4}",
+                  "\{wbo\}#{ID+2}",
                  ], JSON.parse(body)
   end
 
