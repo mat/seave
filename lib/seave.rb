@@ -25,10 +25,12 @@ configure do
   USER_NOT_FOUND         = '"User not found"'
   INVALID_USERNAME_CHARS = '"Invalid characters in username"'
   RECORD_NOT_FOUND       = '"Record not found"'
+  NOT_SUPPORTED          = '"Not supported."'
 
   # TODO: Move back to User again?
   VALID_NAME = /^[A-Z0-9._-]+$/i
 
+  SUPPORTED_DELETE_PARAMS = ['username', 'collection']
 end
 
 ActiveRecord::Base.establish_connection(
@@ -122,7 +124,7 @@ end
 
 
 def not_supported
-  [501, 'Not yet supported.']
+  [501, NOT_SUPPORTED]
 end
 
 delete "#{PREFIX}/:user/:collection/:id" do
@@ -131,10 +133,10 @@ delete "#{PREFIX}/:user/:collection/:id" do
   timestamp
 end
 
-delete "#{PREFIX}/:user/:collection/?" do
-  WBO.delete_all(["username = ? AND collection = ?", 
-        params[:user], params[:collection]])
+delete "#{PREFIX}/:username/:collection/?" do
+  return not_supported unless (params.keys - SUPPORTED_DELETE_PARAMS).empty?
 
+  WBO.delete_all(params)
   timestamp
 end
 

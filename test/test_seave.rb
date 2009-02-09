@@ -363,5 +363,16 @@ class TestSeave < Test::Unit::TestCase
     get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+2}")
     assert_body RECORD_NOT_FOUND
   end
+
+  def test_delete_whole_collection_with_unsupported_options
+    delete "#{PREFIX}/#{USERNAME}/#{COLLECTION}/?parentid=#{ID_PREFIX}1&limit=2"
+    assert_stat 501
+    assert_body NOT_SUPPORTED
+
+    delete "#{PREFIX}/#{USERNAME}/#{COLLECTION}/?sort&limit=2"
+    assert_stat 501
+    assert_body NOT_SUPPORTED
+  end
+
 end
 
