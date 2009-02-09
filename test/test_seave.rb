@@ -337,5 +337,31 @@ class TestSeave < Test::Unit::TestCase
     assert_timestamp_body
   end
 
+  def test_delete_whole_collection
+    create_wbo(ID)
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID}")
+    assert_stat 200
+
+    create_wbo(ID+1)
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+1}")
+    assert_stat 200
+
+    create_wbo(ID+2)
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+2}")
+    assert_stat 200
+
+    delete "#{PREFIX}/#{USERNAME}/#{COLLECTION}/"
+    assert_stat 200
+    assert_timestamp_body
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID}")
+    assert_body RECORD_NOT_FOUND
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+1}")
+    assert_body RECORD_NOT_FOUND
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+2}")
+    assert_body RECORD_NOT_FOUND
+  end
 end
 

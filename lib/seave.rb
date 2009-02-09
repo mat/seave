@@ -132,7 +132,10 @@ delete "#{PREFIX}/:user/:collection/:id" do
 end
 
 delete "#{PREFIX}/:user/:collection/?" do
-  not_supported
+  WBO.delete_all(["username = ? AND collection = ?", 
+        params[:user], params[:collection]])
+
+  timestamp
 end
 
 post "#{PREFIX}/:user/:collection/?" do
