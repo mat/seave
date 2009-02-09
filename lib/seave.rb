@@ -24,6 +24,7 @@ configure do
   USER_ALREADY_EXISTS    = '"User already exists"'
   USER_NOT_FOUND         = '"User not found"'
   INVALID_USERNAME_CHARS = '"Invalid characters in username"'
+  RECORD_NOT_FOUND       = '"Record not found"'
 
   # TODO: Move back to User again?
   VALID_NAME = /^[A-Z0-9._-]+$/i
@@ -164,8 +165,16 @@ get "#{PREFIX}/:user/:collection/?" do
   wbos.map{|w| w.tid }.to_json
 end
 
-get "#{PREFIX}/:user/:collection/:foo?" do
-  not_supported
+get "#{PREFIX}/:username/:collection/:tid" do
+  s = "tid, collection, parentid, modified, depth, sortindex, payload"
+  wbo = WBO.first(:conditions => params, :select => s)
+  if wbo
+    wbo = wbo.attributes
+    wbo['id'] = wbo.delete('tid')
+    wbo.to_json
+  else
+    [404, RECORD_NOT_FOUND]
+  end
 end
 
 

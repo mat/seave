@@ -19,6 +19,8 @@ PASSWORD     = 'test123'
 ADMIN_SECRET = 'bad secret'
 ADMIN_PREFIX = 'weave/admin'
 ID           = 42
+ID_PREFIX    = 'wbo'
+COLLECTION   = 'bookmarks'
 
 class TestSeave < Test::Unit::TestCase
 
@@ -72,7 +74,7 @@ class TestSeave < Test::Unit::TestCase
                "pass" => pass
   end
 
-  def create_wbo(id = ID, user = USERNAME, collection = 'bookmarks')
+  def create_wbo(id = ID, user = USERNAME, collection = COLLECTION)
     put "#{PREFIX}/#{user}/#{collection}/#{id}", wbo_as_json(:id => id)
   end
 
@@ -298,6 +300,26 @@ class TestSeave < Test::Unit::TestCase
                   "\{wbo\}#{ID+4}",
                   "\{wbo\}#{ID+2}",
                  ], JSON.parse(body)
+  end
+
+  def test_get_wbo
+    create_wbo
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID}")
+    assert_stat 200
+
+    created_wbo = JSON.parse(wbo_as_json)
+    created_wbo['collection'] = COLLECTION
+
+    returned_wbo = JSON.parse(body)
+    returned_wbo.delete('modified')
+
+    assert_equal created_wbo, returned_wbo
+  end
+
+  def test_get_non_existent_wbo
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}#{ID}}")
+    assert_stat 404
+    assert_body RECORD_NOT_FOUND
   end
 
   def test_delete_single_object
