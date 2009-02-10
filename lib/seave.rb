@@ -30,7 +30,7 @@ configure do
   # TODO: Move back to User again?
   VALID_NAME = /^[A-Z0-9._-]+$/i
 
-  SUPPORTED_DELETE_PARAMS = ['username', 'collection']
+  SUPPORTED_DELETE_PARAMS = ['username', 'collection', 'parentid']
 end
 
 ActiveRecord::Base.establish_connection(

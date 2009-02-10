@@ -374,5 +374,36 @@ class TestSeave < Test::Unit::TestCase
     assert_body NOT_SUPPORTED
   end
 
+  def test_delete_collection_but_only_certain_parentids
+    create_wbo(ID)
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID}")
+    assert_stat 200
+
+    create_wbo(ID+1)
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+1}")
+    assert_stat 200
+
+    create_wbo(ID+2)
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+2}")
+    assert_stat 200
+
+    create_wbo(ID+3)
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+3}")
+    assert_stat 200
+
+    delete URI.escape "#{PREFIX}/#{USERNAME}/#{COLLECTION}/?parentid={#{ID_PREFIX}}0"
+    assert_stat 200
+    assert_timestamp_body
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID}")
+    assert_body RECORD_NOT_FOUND
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+3}")
+    assert_body RECORD_NOT_FOUND
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+1}")
+    assert_stat 200
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID+2}")
+    assert_stat 200
+  end
 end
 
