@@ -200,6 +200,30 @@ class TestSeave < Test::Unit::TestCase
     assert_body INVALID_WBO
   end
 
+  def test_post_batch_of_wbos
+    batch = ''
+    1.upto(3) do |id|
+      batch += ", #{wbo_as_json(:id => id)}"
+    end
+    batch.sub!(/^,/, '[')
+    batch += ']'
+
+    post "#{PREFIX}/#{USERNAME}/#{COLLECTION}/", batch
+    assert_stat 200
+    assert_match /"modified":\d+\.\d+/, body
+    assert_match /"success":\[.+\]/ , body
+    assert_match /"failed":\[\]/ , body # [] fails, each should succeed
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}1")
+    assert_stat 200
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}2")
+    assert_stat 200
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}3")
+    assert_stat 200
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}4")
+    assert_body RECORD_NOT_FOUND
+  end
+
   def test_get_wbo_w_missing_username
     get "#{PREFIX}/"
     assert_stat 400

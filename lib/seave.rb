@@ -67,7 +67,7 @@ class WBO < ActiveRecord::Base
   validates_presence_of     :payload
 
   def before_validation
-    self.modified = Time.now.to_f
+    self.modified = Time.now.to_f unless self.modified
   end
 
   # TODO use :scope
@@ -81,8 +81,9 @@ def md5(str)
   digest = Digest::MD5.hexdigest(str)
 end
 
-def timestamp
- Time.now.to_f.round(2).to_s 
+def timestamp(format = :string)
+  return Time.now.to_f.round(2).to_s if format == :string
+  return Time.now.to_f.round(2)
 end
 
 put "#{PREFIX}/:user/:collection/?(:weave_id)?" do
@@ -141,7 +142,38 @@ delete "#{PREFIX}/:username/:collection/?" do
 end
 
 post "#{PREFIX}/:user/:collection/?" do
-  not_supported
+  body = request.body.read
+  batch = []
+  begin
+    batch = JSON.parse(body)
+  rescue JSON::ParserError
+    return [400, JSON_PARSE_FAILURE]
+  end
+
+  time = timestamp(:float)
+  success_ids, failed_ids = [], []
+  batch.each do |data|
+    if data['id'].blank?
+      failed_ids << data['id']
+      next
+    end
+
+    data['tid']        = data.delete('id') # Free id for ActiveRecord
+    data['username']   = params[:user]
+    data['collection'] = params[:collection]
+    data['modified']   = time
+    begin
+      WBO.create(data)
+    rescue ActiveRecord::RecordInvalid => e
+      failed_ids << data['tid']
+    end
+    success_ids << data['tid']
+  end
+
+  {'modified' => time,
+   'success'  => success_ids,
+   'failed'   => failed_ids
+  }.to_json
 end
 
 get "#{PREFIX}/:user/:collection/?" do
