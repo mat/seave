@@ -74,6 +74,17 @@ class WBO < ActiveRecord::Base
   def WBO.collections(user)
     find_by_sql( ['SELECT DISTINCT collection FROM wbos WHERE username = ?',user])
   end
+
+  def to_json
+    json = %Q|
+    {"id":"#{self.tid}",
+     "collection":"#{self.collection}",
+     "parentid":"#{self.parentid}",
+     "modified":#{self.modified},
+     "depth":#{self.depth},
+     "sortindex":#{self.sortindex},
+     "payload":"#{self.payload}"}|.gsub(/,\n +/, ',').gsub(/^ +/, '')
+  end
 end
 
 
@@ -206,8 +217,8 @@ get "#{PREFIX}/:username/:collection/:tid" do
   s = "tid, collection, parentid, modified, depth, sortindex, payload"
   wbo = WBO.first(:conditions => params, :select => s)
   if wbo
-    wbo = wbo.attributes
-    wbo['id'] = wbo.delete('tid')
+    #wbo = wbo.attributes
+    #wbo['id'] = wbo.delete('tid')
     wbo.to_json
   else
     [404, RECORD_NOT_FOUND]
