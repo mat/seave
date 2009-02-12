@@ -40,8 +40,9 @@ ActiveRecord::Base.establish_connection(
 
 class User < ActiveRecord::Base
   
-  validates_presence_of :username
-  validates_format_of   :username, :with => VALID_NAME
+  validates_presence_of   :username
+  validates_uniqueness_of :username
+  validates_format_of     :username, :with => VALID_NAME
 
   validates_presence_of :md5 # password. no sha? hmm.
   validates_format_of   :md5, :with => /^[0-9a-f]{32,32}$/i
