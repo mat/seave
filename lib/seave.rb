@@ -33,6 +33,7 @@ configure do
   SUPPORTED_DELETE_PARAMS = ['username', 'collection', 'parentid']
 end
 
+#ActiveRecord::Base.logger = Logger.new(STDOUT)
 ActiveRecord::Base.establish_connection(
   :adapter => 'sqlite3',
   :dbfile =>  'db/test.sqlite3'
@@ -195,28 +196,17 @@ post "#{PREFIX}/:user/:collection/?" do
 end
 
 get "#{PREFIX}/:user/:collection/?" do
-  wbos = case params[:sort]
-    when 'index'
-      WBO.find_all_by_username_and_collection(params[:user],
-                                              params[:collection],
-                                              :order => 'sortindex ASC')
-    when 'newest'
-      WBO.find_all_by_username_and_collection(params[:user],
-                                              params[:collection],
-                                              :order => 'modified DESC')
-    when 'oldest'
-      WBO.find_all_by_username_and_collection(params[:user],
-                                              params[:collection],
-                                              :order => 'modified ASC')
-    when 'depthindex'
-      WBO.find_all_by_username_and_collection(params[:user],
-                                              params[:collection],
-                                              :order => 'depth, sortindex')
-    else
-      WBO.find_all_by_username_and_collection(params[:user],
-                                              params[:collection])
+  order = case params[:sort]
+    when 'index'      : 'sortindex'
+    when 'newest'     : 'modified DESC'
+    when 'oldest'     : 'modified'
+    when 'depthindex' : 'depth, sortindex'
+    else nil
   end
 
+  wbos = WBO.find_all_by_username_and_collection(params[:user],
+                                                 params[:collection],
+                                                :order => order)
   wbos.map{|w| w.tid }.to_json
 end
 
