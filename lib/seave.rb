@@ -111,13 +111,19 @@ put "#{PREFIX}/:user/:collection/?(:weave_id)?" do
 
     h['username'] = params[:user]
     h['collection'] = params[:collection]
-    WBO.create(h)
+
+    if h['payload']
+      WBO.create(h)
+    else # update existing
+      wbo = WBO.find_by_collection_and_tid(h['collection'], h['tid'])
+      return [400, INVALID_WBO] unless wbo
+      wbo.update_attributes!(h)
+    end
   rescue JSON::ParserError
     return [400, JSON_PARSE_FAILURE]
   rescue ActiveRecord::RecordInvalid => e
     return [400, INVALID_WBO + " " + e.to_s]
   end
-  
   timestamp
 end
 

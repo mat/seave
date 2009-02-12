@@ -49,7 +49,7 @@ class TestSeave < Test::Unit::TestCase
 
   def wbo_as_json(data = {})
     id        = data[:id] || ID
-    id_prefix = data[:id_prefix] || 'wbo'
+    id_prefix = data[:id_prefix] || ID_PREFIX
     depth     = data[:depth] || id % 3
     payload   = data[:payload] || 'foo'
 
@@ -198,6 +198,29 @@ class TestSeave < Test::Unit::TestCase
     put "#{PREFIX}/#{USERNAME}/test/", wbo_as_json_wo_id
     assert_stat 400
     assert_body INVALID_WBO
+  end
+
+  def test_replace_depth_attribute
+    put "#{PREFIX}/#{USERNAME}/#{COLLECTION}/#{ID}", wbo_as_json(:id => ID)
+    assert_stat 200
+    assert_timestamp_body
+
+    json_without_payload = %Q|{"id":"{#{ID_PREFIX}}#{ID}", "depth":2}|
+    put "#{PREFIX}/#{USERNAME}/#{COLLECTION}/#{ID}", json_without_payload
+    assert_timestamp_body
+    assert_stat 200
+
+    get URI.escape "#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID}"
+    assert_stat 200
+
+    expected_wbo = JSON.parse(wbo_as_json)
+    expected_wbo['collection'] = COLLECTION
+    expected_wbo['depth'] = 2
+
+    returned_wbo = JSON.parse(body)
+    returned_wbo.delete('modified')
+
+    assert_equal expected_wbo, returned_wbo
   end
 
   def test_post_batch_of_wbos
