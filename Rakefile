@@ -1,11 +1,6 @@
 require 'rubygems'
 require 'rake'
-
-# https://wiki.mozilla.org/Labs/Weave/0.3/Setup/Server
-# id needed just for ActiveRecord but it shouldn't hurt.
-USER_TABLE = 'CREATE TABLE users (id int, username text primary key, md5 text, email text, status integer, alert text);'
-# Again, id is for ActiveRecord, tid is 'real' Weave id.
-WBO_TABLE = 'CREATE TABLE wbos (id int, tid text, username text, sortindex int, depth int, collection text, parentid text, encryption text, modified real, encoding text, payload text, primary key (collection,tid) );'
+require 'activerecord'
 
 DB_FILE = "db/test.sqlite3"
 
@@ -14,11 +9,46 @@ namespace :db do
   task :create do
 
     if File.exists?(DB_FILE)
-      puts "#{DB_FILE} already exists. Won't overwrite it. Delete first."
+      puts "#{DB_FILE} already exists. Won't overwrite it. Delete first with rake db:destroy."
     else
-      cmd = "sqlite3 #{DB_FILE} '#{USER_TABLE} #{WBO_TABLE}'"
-      puts "Created #{DB_FILE}. Bye." if system(cmd) 
+      ActiveRecord::Base.establish_connection(
+        :adapter => 'sqlite3',
+        :dbfile =>  DB_FILE)
+
+      ActiveRecord::Base.logger = Logger.new(STDOUT)
+
+      # https://wiki.mozilla.org/Labs/Weave/0.3/Setup/Server
+      ActiveRecord::Schema.define do
+        create_table :users do |t|
+          t.string  :username, :limit => 32, :null => false
+          t.text    :md5,      :limit => 32, :null => false
+          t.text    :email,    :limit => 64
+          t.integer :status,   :limit => 4 # tinyint
+          t.text    :alert
+        end
+        add_index :users, :username, :unique
+
+        create_table :wbos do |t|
+          t.string  :username,   :limit => 32, :null => false
+          t.string  :collection, :limit => 64, :null => false
+          t.string  :tid,        :limit => 64, :null => false
+          t.string  :parentid,   :limit => 64
+          t.decimal :modified,   :precision => 12, :scale => 2
+          t.integer :sortindex
+          t.integer :depth,      :limit => 4 # tinyint
+          t.text    :payload,                  :null => false
+        end
+        add_index :wbos, [:username, :collection, :tid]
+        add_index :wbos, [:username, :collection, :parentid]
+        add_index :wbos, [:username, :collection, :modified]
+      end
+
     end
+  end
+
+  desc "Destroy sqlite3 DB in #{DB_FILE}"
+  task :destroy do
+    File.delete(DB_FILE) if File.exists?(DB_FILE)
   end
 
   desc "Create example users"
