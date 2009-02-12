@@ -85,7 +85,7 @@ class WBO < ActiveRecord::Base
      "modified":#{self.modified},
      "depth":#{self.depth},
      "sortindex":#{self.sortindex},
-     "payload":"#{self.payload}"}|.gsub(/,\n +/, ',').gsub(/^ +/, '')
+     "payload":"#{self.payload}"}|.gsub(/,\n +/, ',').gsub(/^\s+/, '')
   end
 end
 
