@@ -12,6 +12,7 @@ require 'pp'
 configure do
 
   PREFIX       = '/0.3/user'
+  ADMIN_PREFIX = '/weave/admin'
 
   # Error codes.
   ILLEGAL_METHOD   = '"1"'
@@ -223,11 +224,11 @@ get "#{PREFIX}/:username/:collection/:tid" do
 end
 
 
-get '/weave/admin' do
+get "#{ADMIN_PREFIX}" do
   User.all.inspect
 end
 
-post '/weave/admin' do
+post "#{ADMIN_PREFIX}" do
 
   case params[:function]
     when 'create'

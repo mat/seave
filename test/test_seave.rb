@@ -17,7 +17,6 @@ ActiveRecord::Base.establish_connection(
 USERNAME     = 'tom'
 PASSWORD     = 'test123'
 ADMIN_SECRET = 'bad secret'
-ADMIN_PREFIX = 'weave/admin'
 ID           = 42
 ID_PREFIX    = 'wbo'
 COLLECTION   = 'bookmarks'
@@ -31,7 +30,7 @@ class TestSeave < Test::Unit::TestCase
 
   def post_admin(params)
     params["secret"] = ADMIN_SECRET
-    post "/#{ADMIN_PREFIX}", params
+    post "#{ADMIN_PREFIX}", params
   end
 
   def assert_stat(expected_code)
