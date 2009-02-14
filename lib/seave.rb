@@ -90,11 +90,6 @@ class WBO < ActiveRecord::Base
   end
 end
 
-
-def md5(str)
-  digest = Digest::MD5.hexdigest(str)
-end
-
 def timestamp(format = :string)
   return Time.now.to_f.round(2).to_s if format == :string
   return Time.now.to_f.round(2)
@@ -261,7 +256,7 @@ def admin_create(user, pass)
   end
 
   begin
-    User.create!(:username => user, :md5 => md5(pass))
+    User.create!(:username => user, :md5 => Digest::MD5.hexdigest(pass))
   rescue
     [400, INVALID_USERNAME_CHARS]
   else
@@ -289,7 +284,8 @@ def admin_update(user, newpass)
    if !User.exists?(:username => user)
      [404, USER_NOT_FOUND]
    else
-     User.find_by_username(user).update_attributes!(:md5 => md5(newpass))
+     u = User.find_by_username(user)
+     u.update_attributes!(:md5 => Digest::MD5.hexdigest(newpass))
      "success"
    end
 end
