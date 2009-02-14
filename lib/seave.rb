@@ -245,7 +245,9 @@ post "#{ADMIN_PREFIX}" do
 end
 
 get '/' do
-  'Home sweet home.'
+  'Hello, this is Seave, a 
+   <a href="https://wiki.mozilla.org/Labs/Weave/0.3/API">Weave</a>
+   server implementation.'
 end
 
 
