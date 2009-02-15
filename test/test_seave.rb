@@ -50,13 +50,13 @@ class TestSeave < Test::Unit::TestCase
     id        = data[:id] || ID
     id_prefix = data[:id_prefix] || ID_PREFIX
     depth     = data[:depth] || id % 3
-    payload   = data[:payload] || 'foo'
+    payload   = data[:payload] || "foo#{id}"
 
     json = %Q|{"id":"{#{id_prefix}}#{id}",
                "parentid":"{#{id_prefix}}#{id%3}",
                "sortindex":#{id},
                "depth":#{depth},
-               "payload":"#{payload}#{id}"}|
+               "payload":"#{payload}"}|
   end
 
   def wbo_as_json_wo_id(data = {})
@@ -181,10 +181,18 @@ class TestSeave < Test::Unit::TestCase
     assert_timestamp_body
   end
 
-  def test_put_wbo_w_malformed_json_payload
+  def test_put_wbo_w_malformed_json_body
     put "#{PREFIX}/#{USERNAME}/test/#{ID}", '{:foo[}]'
     assert_stat 400
     assert_body JSON_PARSE_FAILURE 
+  end
+
+  def test_put_wbo_w_non_json_payload
+    wbo = wbo_as_json(:payload => 42).gsub(/"payload":"42"/,'"payload":["a","b"]')
+
+    put "#{PREFIX}/#{USERNAME}/test/#{ID}", wbo
+    assert_stat 400
+    assert_body INVALID_WBO
   end
 
   def test_put_wbo_w_missing_id_in_json

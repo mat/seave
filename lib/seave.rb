@@ -69,6 +69,14 @@ class WBO < ActiveRecord::Base
 
   validates_presence_of     :payload
 
+  validate :payload_must_be_json_string
+
+  def payload_must_be_json_string
+    unless payload.is_a?(String)
+      errors.add(:payload, "needs to be a json-encoded string")
+    end
+  end
+
   def before_validation
     self.modified = Time.now.to_f unless self.modified
   end
@@ -111,7 +119,8 @@ put "#{PREFIX}/:user/:collection/?(:weave_id)?" do
     h['collection'] = params[:collection]
 
     if h['payload']
-      WBO.create(h)
+      wbo = WBO.new(h)
+      wbo.save!
     else # update existing
       wbo = WBO.find_by_collection_and_tid(h['collection'], h['tid'])
       return [400, INVALID_WBO] unless wbo
@@ -120,7 +129,7 @@ put "#{PREFIX}/:user/:collection/?(:weave_id)?" do
   rescue JSON::ParserError
     return [400, JSON_PARSE_FAILURE]
   rescue ActiveRecord::RecordInvalid => e
-    return [400, INVALID_WBO + " " + e.to_s]
+    return [400, INVALID_WBO]
   end
   timestamp
 end
