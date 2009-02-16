@@ -194,10 +194,10 @@ post "#{PREFIX}/:user/:collection/?" do
     success_ids << data['tid']
   end
 
-  {'modified' => time,
-   'success'  => success_ids,
-   'failed'   => failed_ids
-  }.to_json
+  json = %Q|
+   {"modified":#{time.to_json},
+    "success":#{success_ids.to_json},
+    "failed":#{failed_ids.to_json}}|.gsub(/,\n +/, ',').gsub(/^\s+/, '')
 end
 
 get "#{PREFIX}/:user/:collection/?" do
