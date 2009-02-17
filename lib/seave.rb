@@ -175,10 +175,11 @@ post "#{PREFIX}/:user/:collection/?" do
   end
 
   time = timestamp(:float)
-  success_ids, failed_ids = [], []
+  success_ids = []
+  failed_ids  = Hash.new {|hash,key| hash[key] = []}
   batch.each do |data|
     if data['id'].blank?
-      failed_ids << data['id']
+      failed_ids[data['id']] << 'no id given'
       next
     end
 
@@ -187,12 +188,15 @@ post "#{PREFIX}/:user/:collection/?" do
     data['collection'] = params[:collection]
     data['modified']   = time
     begin
-      WBO.create(data)
+      wbo = WBO.new(data)
+      wbo.save!
     rescue ActiveRecord::RecordInvalid => e
-      failed_ids << data['tid']
+      failed_ids[data['tid']] <<  e.to_s
     end
     success_ids << data['tid']
   end
+
+  failed_ids = [] if failed_ids.empty?
 
   json = %Q|
    {"modified":#{time.to_json},

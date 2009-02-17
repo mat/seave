@@ -49,11 +49,12 @@ class TestSeave < Test::Unit::TestCase
   def wbo_as_json(data = {})
     id        = data[:id] || ID
     id_prefix = data[:id_prefix] || ID_PREFIX
+    parentid  = data[:parentid] || "{#{id_prefix}}#{id%3}"
     depth     = data[:depth] || id % 3
     payload   = data[:payload] || "foo#{id}"
 
     json = %Q|{"id":"{#{id_prefix}}#{id}",
-               "parentid":"{#{id_prefix}}#{id%3}",
+               "parentid":"#{parentid}",
                "sortindex":#{id},
                "depth":#{depth},
                "payload":"#{payload}"}|
@@ -252,6 +253,48 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
     get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}4")
     assert_body RECORD_NOT_FOUND
+  end
+
+  def test_post_wbo_with_too_long_parentid
+    json = wbo_as_json(:parentid => ('x' * 100))
+    #puts json
+    put "#{PREFIX}/#{USERNAME}/test/", json
+    assert_stat 400
+    assert_body INVALID_WBO
+  end
+
+  def test_post_batch_of_wbos_with_some_too_long_parentids
+    batch = ''
+    1.upto(4) do |id|
+      if (id % 2 == 0)
+        batch += ", #{wbo_as_json(:id => id)}"
+      else
+        batch += ", #{wbo_as_json(:id => id, :parentid => ('x' * 100) )}"
+      end
+    end
+    batch.sub!(/^,/, '[')
+    batch += ']'
+
+    post "#{PREFIX}/#{USERNAME}/#{COLLECTION}/", batch
+    assert_stat 200
+    assert_match /"modified":\d+\.\d+/, body
+    assert_match /"success":\[.+\]/ , body
+
+    failed = /"failed":\{(.*)\}/
+    assert_match failed, body
+
+    the_failed_ones = failed.match(body)[1]
+    assert the_failed_ones.include? '{wbo}1'
+    assert the_failed_ones.include? '{wbo}3'
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}1")
+    assert_body RECORD_NOT_FOUND
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}2")
+    assert_stat 200
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}3")
+    assert_body RECORD_NOT_FOUND
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}4")
+    assert_stat 200
   end
 
   def test_get_wbo_w_missing_username
