@@ -63,7 +63,7 @@ class WBO < ActiveRecord::Base
   validates_presence_of     :collection
   validates_length_of       :collection, :maximum => 64 
 
-  validates_numericality_of :depth
+  validates_numericality_of :depth, :allow_nil => true
 
   validates_numericality_of :sortindex
 
@@ -78,6 +78,7 @@ class WBO < ActiveRecord::Base
   end
 
   def before_validation
+    self.depth    = nil if self.depth.blank?
     self.modified = Time.now.to_f unless self.modified
   end
 
@@ -94,7 +95,11 @@ class WBO < ActiveRecord::Base
      "modified":#{self.modified},
      "depth":#{self.depth},
      "sortindex":#{self.sortindex},
-     "payload":"#{self.payload}"}|.gsub(/,\n +/, ',').gsub(/^\s+/, '')
+     "payload":"#{self.payload}"}|
+
+     json.gsub!(/\"depth\":.*,/, '') if self.depth.nil?
+
+     json.gsub(/,\n +/, ',').gsub(/^\s+/, '')
   end
 end
 

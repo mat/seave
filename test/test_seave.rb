@@ -58,6 +58,12 @@ class TestSeave < Test::Unit::TestCase
                "sortindex":#{id},
                "depth":#{depth},
                "payload":"#{payload}"}|
+
+    if data[:depth] == :none
+      json.gsub!(/\"depth\":.*,/, '')
+    end
+
+    json
   end
 
   def wbo_as_json_wo_id(data = {})
@@ -206,6 +212,16 @@ class TestSeave < Test::Unit::TestCase
     put "#{PREFIX}/#{USERNAME}/test/", wbo_as_json_wo_id
     assert_stat 400
     assert_body INVALID_WBO
+  end
+
+  def test_put_wbo_w_missing_depth
+    put "#{PREFIX}/#{USERNAME}/#{COLLECTION}/", wbo_as_json(:depth => :none)
+    assert_stat 200
+    assert_timestamp_body
+
+    get URI.escape "#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}#{ID}"
+    assert_stat 200
+    assert !body.include?('depth')
   end
 
   def test_replace_depth_attribute
