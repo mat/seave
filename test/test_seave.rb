@@ -300,14 +300,19 @@ class TestSeave < Test::Unit::TestCase
     post "#{PREFIX}/#{USERNAME}/#{COLLECTION}/", batch
     assert_stat 200
     assert_match /"modified":\d+\.\d+/, body
-    assert_match /"success":\[.+\]/ , body
+
+    success = /"success":\[(.*?)\]/
+    assert_match success, body
+    the_good_ones = success.match(body)[1]
+    assert !(the_good_ones.include?('{wbo}1'))
+    assert !(the_good_ones.include?('{wbo}3'))
 
     failed = /"failed":\{(.*)\}/
     assert_match failed, body
 
     the_failed_ones = failed.match(body)[1]
-    assert the_failed_ones.include? '{wbo}1'
-    assert the_failed_ones.include? '{wbo}3'
+    assert the_failed_ones.include?('{wbo}1')
+    assert the_failed_ones.include?('{wbo}3')
 
     get URI.escape("#{PREFIX}/#{USERNAME}/#{COLLECTION}/{#{ID_PREFIX}}1")
     assert_body RECORD_NOT_FOUND

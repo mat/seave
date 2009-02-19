@@ -196,9 +196,10 @@ post "#{PREFIX}/:user/:collection/?" do
       wbo = WBO.new(data)
       wbo.save!
     rescue ActiveRecord::RecordInvalid => e
-      failed_ids[data['tid']] <<  e.to_s
+      failed_ids[data['tid']] <<  ''
+    else
+      success_ids << data['tid']
     end
-    success_ids << data['tid']
   end
 
   failed_ids = [] if failed_ids.empty?
