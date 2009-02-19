@@ -32,6 +32,7 @@ configure do
   VALID_NAME = /^[A-Z0-9._-]+$/i
 
   SUPPORTED_DELETE_PARAMS = ['username', 'collection', 'parentid']
+  SUPPORTED_GET_PARAMS    = ['user', 'collection', 'sort']
 end
 
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
@@ -211,6 +212,8 @@ post "#{PREFIX}/:user/:collection/?" do
 end
 
 get "#{PREFIX}/:user/:collection/?" do
+  return not_supported unless (params.keys - SUPPORTED_GET_PARAMS).empty?
+
   order = case params[:sort]
     when 'index'      : 'sortindex'
     when 'newest'     : 'modified DESC'
