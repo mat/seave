@@ -224,6 +224,12 @@ class TestSeave < Test::Unit::TestCase
     assert !body.include?('depth')
   end
 
+  def test_put_wbo_w_non_numeric_depth
+    put "#{PREFIX}/#{USERNAME}/#{COLLECTION}/", wbo_as_json(:depth => '"foo"')
+    assert_stat 400
+    assert_body INVALID_WBO
+  end
+
   def test_replace_depth_attribute
     put "#{PREFIX}/#{USERNAME}/#{COLLECTION}/#{ID}", wbo_as_json(:id => ID)
     assert_stat 200
