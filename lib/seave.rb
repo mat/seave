@@ -32,7 +32,7 @@ configure do
   VALID_NAME = /^[A-Z0-9._-]+$/i
 
   SUPPORTED_DELETE_PARAMS = %w(username collection parentid)
-  SUPPORTED_GET_PARAMS    = %w(user     collection sort)
+  SUPPORTED_GET_PARAMS    = %w(username collection parentid sort)
 end
 
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
@@ -211,20 +211,19 @@ post "#{PREFIX}/:user/:collection/?" do
     "failed":#{failed_ids.to_json}}|.gsub(/,\n +/, ',').gsub(/^\s+/, '')
 end
 
-get "#{PREFIX}/:user/:collection/?" do
+get "#{PREFIX}/:username/:collection/?" do
   return not_supported unless (params.keys - SUPPORTED_GET_PARAMS).empty?
 
-  order = case params[:sort]
+  order = case params['sort']
     when 'index'      : 'sortindex'
     when 'newest'     : 'modified DESC'
     when 'oldest'     : 'modified'
     when 'depthindex' : 'depth, sortindex'
     else nil
   end
+  params.delete('sort') if params.include?('sort')
 
-  wbos = WBO.find_all_by_username_and_collection(params[:user],
-                                                 params[:collection],
-                                                :order => order)
+  wbos = WBO.all(:conditions => params, :order => order)
   wbos.map{|w| w.tid }.to_json
 end
 
