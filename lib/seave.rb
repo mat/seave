@@ -31,8 +31,8 @@ configure do
   # TODO: Move back to User again?
   VALID_NAME = /^[A-Z0-9._-]+$/i
 
-  SUPPORTED_DELETE_PARAMS = ['username', 'collection', 'parentid']
-  SUPPORTED_GET_PARAMS    = ['user', 'collection', 'sort']
+  SUPPORTED_DELETE_PARAMS = %w(username collection parentid)
+  SUPPORTED_GET_PARAMS    = %w(user     collection sort)
 end
 
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
