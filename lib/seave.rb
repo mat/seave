@@ -166,6 +166,7 @@ end
 
 delete "#{PREFIX}/:username/:collection/?" do
   return not_supported unless (params.keys - SUPPORTED_DELETE_PARAMS).empty?
+  # TODO parentid, older, newer, limit, offset, sort
 
   WBO.delete_all(params)
   timestamp
@@ -213,6 +214,7 @@ end
 
 get "#{PREFIX}/:username/:collection/?" do
   return not_supported unless (params.keys - SUPPORTED_GET_PARAMS).empty?
+  # TODO full, newer, older, limit, offset
 
   order = case params['sort']
     when 'index'      : 'sortindex'
