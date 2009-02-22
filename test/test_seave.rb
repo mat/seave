@@ -374,6 +374,25 @@ class TestSeave < Test::Unit::TestCase
                  ], JSON.parse(body).sort
   end
 
+  def test_get_collection_by_parentid_with_full_data
+    collection = 'bookmarks'
+    create_wbo(ID  , USERNAME, collection)
+    create_wbo(ID+1, USERNAME, collection)
+    create_wbo(ID+2, USERNAME, collection)
+    create_wbo(ID+3, USERNAME, collection)
+    create_wbo(ID+4, USERNAME, collection)
+
+    get URI.escape("#{PREFIX}/#{USERNAME}/#{collection}/?parentid={#{ID_PREFIX}}1&full=1")
+
+    assert_stat 200
+
+    assert_match Regexp.new(Regexp.escape('"id":"{wbo}43"')), body
+    assert_match Regexp.new(Regexp.escape('"payload":"foo43"')), body
+
+    assert_match Regexp.new(Regexp.escape('"id":"{wbo}46"')), body
+    assert_match Regexp.new(Regexp.escape('"payload":"foo46"')), body
+  end
+
   def test_get_collection_sorted_by_index
     collection = 'bookmarks'
     create_wbo(ID  , USERNAME, collection)

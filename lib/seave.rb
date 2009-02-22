@@ -32,7 +32,7 @@ configure do
   VALID_NAME = /^[A-Z0-9._-]+$/i
 
   SUPPORTED_DELETE_PARAMS = %w(username collection parentid)
-  SUPPORTED_GET_PARAMS    = %w(username collection parentid sort)
+  SUPPORTED_GET_PARAMS    = %w(username collection parentid sort full)
 end
 
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
@@ -214,7 +214,7 @@ end
 
 get "#{PREFIX}/:username/:collection/?" do
   return not_supported unless (params.keys - SUPPORTED_GET_PARAMS).empty?
-  # TODO full, newer, older, limit, offset
+  # TODO newer, older, limit, offset
 
   order = case params['sort']
     when 'index'      : 'sortindex'
@@ -223,10 +223,19 @@ get "#{PREFIX}/:username/:collection/?" do
     when 'depthindex' : 'depth, sortindex'
     else nil
   end
+  return_full_wbo_data = params['full'] == '1'
+  params.delete('full') if params.include?('full')
   params.delete('sort') if params.include?('sort')
 
   wbos = WBO.all(:conditions => params, :order => order)
-  wbos.map{|w| w.tid }.to_json
+
+  if return_full_wbo_data
+    wbos = "[#{wbos.map{|w| w.to_json }}"
+  else
+    wbos = wbos.map{|w| w.tid }.to_json
+  end
+
+  wbos
 end
 
 get "#{PREFIX}/:username/:collection/:tid" do

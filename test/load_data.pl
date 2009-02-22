@@ -369,6 +369,13 @@ sub user_work
 		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
 		print "parent ids (mod 3 = 1): $result\n" if $VERBOSE;
 		
+		#parentid, but full records
+		# TODO remove this test again when parentid + modified + full works
+		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?parentid={$id_prefix}1&full=1";
+		$req->authorization_basic($USERNAME, $PASSWORD);
+		my $resp = $ua->request($req); $result = $resp->code . " " . $req->method . " " . $req->uri->path ."\n" . $resp->content() . "\n";
+		print "parentid (full records): $result\n" if $VERBOSE;
+
 		# mix our params
 		$req = GET "$PROTOCOL://$SERVER/$PREFIX/$USERNAME/test/?parentid={$id_prefix}1&modified=2454755";
 		$req->authorization_basic($USERNAME, $PASSWORD);
