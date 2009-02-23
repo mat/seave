@@ -91,7 +91,6 @@ class WBO < ActiveRecord::Base
   def to_json
     json = %Q|
     {"id":"#{self.tid}",
-     "collection":"#{self.collection}",
      "parentid":"#{self.parentid}",
      "modified":#{self.modified},
      "depth":#{self.depth},

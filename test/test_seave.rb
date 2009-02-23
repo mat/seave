@@ -244,7 +244,6 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
 
     expected_wbo = JSON.parse(wbo_as_json)
-    expected_wbo['collection'] = COLLECTION
     expected_wbo['depth'] = 2
 
     returned_wbo = JSON.parse(body)
@@ -467,7 +466,6 @@ class TestSeave < Test::Unit::TestCase
     assert_stat 200
 
     created_wbo = JSON.parse(wbo_as_json)
-    created_wbo['collection'] = COLLECTION
 
     returned_wbo = JSON.parse(body)
     returned_wbo.delete('modified')
