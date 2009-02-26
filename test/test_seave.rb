@@ -2,15 +2,8 @@
 
 require 'rubygems'
 require 'test/unit'
-require 'sinatra'
 require 'sinatra/test/unit'
 require 'lib/seave'
-require 'activerecord'
-
-ActiveRecord::Base.establish_connection(
-  :adapter => 'sqlite3',
-  :dbfile =>  'db/test.sqlite3'
-)
 
 #PROTOCOL     = 'http'
 #SERVER       = 'localhost:4567'
