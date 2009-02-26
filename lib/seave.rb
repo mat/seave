@@ -5,7 +5,6 @@ require 'sinatra'
 require 'activerecord'
 require 'digest/md5'
 require 'json'
-require 'pp'
 
 require 'lib/models'
 
