@@ -4,6 +4,16 @@ require 'activerecord'
 
 DB_FILE = "db/test.sqlite3"
 
+desc "Starts the weave server"
+task :start do
+  unless File.exists?('config.yml')
+    puts "config.yml missing, please create one first."
+  else
+    puts 'Launching thin server.'
+    `thin -C config.yml -R config.ru start`
+  end
+end
+
 namespace :db do
   desc "Create in db/test.sqlite3"
   task :create do

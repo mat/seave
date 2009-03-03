@@ -15,9 +15,12 @@ Requirements
 
 Launching
 ---------
-Launch Seave on port 4567 using the thin server
+First create a config.yml: Copy config.yml.example and edit it to your needs.
+You can now let Seave fly with
 
-      rackup config.ru -p 4567 -s thin
+      rake start
+
+Seave is running on http://localhost:4567 now.
 
 
 Major Contributors

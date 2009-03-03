@@ -3,4 +3,6 @@ db/**
 .autotest
 seave.txt
 weave.txt
+config.yml
+thin.log
 
