@@ -1,15 +1,17 @@
 Seave
 =====
 
-A [Weave](https://wiki.mozilla.org/Labs/Weave "Weave") server implementation using [Sinatra](http://www.sinatrarb.com/ "Sinatra"). Experimental.
+A [Weave](https://wiki.mozilla.org/Labs/Weave "Weave") server implementation using [Sinatra](http://www.sinatrarb.com/ "Sinatra"). Experimental. Uncomplete, but growing.
 
 Requirements
 ------------
 
-* Ruby 1.8.7 (earlier 1.8.* versions should work as well, but 1.9 is not yet tested.)
+* Ruby 1.8.7 (earlier 1.8.* versions should work as well, but 1.9 has not been tested yet.)
 * RubyGems
-* Gems: Sinatra, ActiveRecord, JSON
+* Gems: Sinatra, ActiveRecord, JSON (mandatory)
 * thin web server (recommended)
+
+Install these gems via
 
         sudo gem install sinatra activerecord json thin
 
@@ -25,5 +27,6 @@ Seave is running on http://localhost:4567 now.
 
 Major Contributors
 ------------------
+
 * Matthias Luedtke
 
