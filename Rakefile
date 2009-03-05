@@ -90,3 +90,28 @@ end
     puts 'OK.'
   end
 
+namespace :admin do
+  desc "Creates a new (user, password) pair. Seave must be running."
+  task :create_user do
+
+    require 'net/http'
+    require 'highline/import'
+    require 'lib/models'
+    require 'lib/seave'
+
+    puts "Let's create a new user."
+    params = {}
+    params["user"] = ask("username: ") { |q| q.validate = User::VALID_NAME }
+    params["pass"] = ask("password: ") { |q| q.validate = /.+/ }
+
+    #TODO params["secret"] = ADMIN_SECRET
+    params["function"] = "create"
+
+    begin
+      uri = URI.parse("http://localhost:4567#{ADMIN_PREFIX}")
+      puts Net::HTTP.post_form(uri,params).body
+    rescue Errno::ECONNREFUSED => e
+      puts 'localhost:4567 unreachable. Run rake start first.'
+    end
+  end
+end

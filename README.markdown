@@ -10,10 +10,11 @@ Requirements
 * RubyGems
 * Gems: Sinatra, ActiveRecord, JSON (mandatory)
 * thin web server (recommended)
+* highline (for rake admin:create_user and friends)
 
 Install these gems via
 
-        sudo gem install sinatra activerecord json thin
+        sudo gem install sinatra activerecord json thin highline
 
 Launching
 ---------
@@ -23,6 +24,13 @@ You can now let Seave fly with
       rake start
 
 Seave is running on http://localhost:4567 now.
+
+Admin functions
+---------------
+Seave provides the following admin functions. They are issued as HTTP requests so Seave needs to be running, run `rake start` first.
+
+
+      rake admin:create_user
 
 
 Major Contributors
