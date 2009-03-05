@@ -1,7 +1,7 @@
 Seave
 =====
 
-A [Weave](https://wiki.mozilla.org/Labs/Weave "Weave") server implementation using [Sinatra](http://www.sinatrarb.com/ "Sinatra"). Experimental. Uncomplete, but growing.
+A [Weave](https://wiki.mozilla.org/Labs/Weave "Weave") server implementation using [Sinatra](http://www.sinatrarb.com/ "Sinatra"). Experimental. Incomplete, but growing.
 
 Requirements
 ------------
