@@ -32,6 +32,8 @@ Seave provides the following admin functions. They are issued as HTTP requests s
 
       rake admin:create_user
 
+      rake admin:delete_user
+
 
 Major Contributors
 ------------------

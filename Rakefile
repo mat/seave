@@ -114,4 +114,28 @@ namespace :admin do
       puts 'localhost:4567 unreachable. Run rake start first.'
     end
   end
+
+  desc "Deletes a user. Seave must be running."
+  task :delete_user do
+
+    require 'net/http'
+    require 'highline/import'
+    require 'lib/models'
+    require 'lib/seave'
+
+    puts "Let's delete a user."
+    params = {}
+    params["user"] = ask("username: ") { |q| q.validate = User::VALID_NAME }
+
+    #TODO params["secret"] = ADMIN_SECRET
+    params["function"] = "delete"
+
+    begin
+      uri = URI.parse("http://localhost:4567#{ADMIN_PREFIX}")
+      puts Net::HTTP.post_form(uri,params).body
+    rescue Errno::ECONNREFUSED => e
+      puts 'localhost:4567 unreachable. Run rake start first.'
+    end
+  end
+
 end
